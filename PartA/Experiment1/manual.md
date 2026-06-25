@@ -11,7 +11,7 @@ To familiarize students with the Arduino IDE and basic input/output interfacing 
 | Component        | Quantity    |
 | ---------------- | ----------- |
 | Arduino UNO      | 1           |
-| LED              | 1           |
+| LED              | 4           |
 | 220Ω Resistor    | 1           |
 | 16×2 LCD Display | 1           |
 | Breadboard       | 1           |
