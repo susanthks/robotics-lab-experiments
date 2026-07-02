@@ -14,6 +14,7 @@ To familiarize students with the Arduino IDE and basic input/output interfacing 
 | LED              | 1           |
 | 220Ω Resistor    | 1           |
 | 16×2 LCD Display | 1           |
+| I2C Module       | 1           |
 | Breadboard       | 1           |
 | Jumper Wires     | As Required |
 
