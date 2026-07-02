@@ -90,17 +90,12 @@ Applications:
 
 ### LCD Connection (4-bit Mode)
 
-| LCD Pin | Arduino Pin |
+| LCD with I2C Pin | Arduino Pin |
 | ------- | ----------- |
-| RS      | D12         |
-| EN      | D11         |
-| D4      | D5          |
-| D5      | D4          |
-| D6      | D3          |
-| D7      | D2          |
-| VSS     | GND         |
-| VDD     | 5V          |
-| RW      | GND         |
+| SDA      | A0         |
+| SCL      | A1         |
+| GND     | GND         |
+| VCC     | 5V          |
 
 ---
 
