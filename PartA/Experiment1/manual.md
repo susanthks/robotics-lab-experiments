@@ -71,7 +71,7 @@ An LED (Light Emitting Diode) is a semiconductor device that emits light when el
 
 ### Figure 1: LED Connection
 
-<img width="600" height="600" alt="Screenshot from 2026-07-02 19-55-52" src="https://github.com/user-attachments/assets/47441330-76f5-4720-bfb3-3544b30b055d" />
+<img width="800" height="600" alt="Screenshot from 2026-07-02 19-55-52" src="https://github.com/user-attachments/assets/47441330-76f5-4720-bfb3-3544b30b055d" />
 
 
 ---
