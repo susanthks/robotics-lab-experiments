@@ -88,7 +88,7 @@ Applications:
 | D13         | LED Anode (+)                         |
 | GND         | LED Cathode (-) through 220Ω resistor |
 
-### LCD Connection (4-bit Mode)
+### LCD Connection (I2C Mode)
 
 | LCD with I2C Pin | Arduino Pin |
 | ------- | ----------- |
