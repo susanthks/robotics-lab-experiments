@@ -90,7 +90,7 @@ Using an **I2C module** reduces the number of Arduino pins required from six to 
 
 ### Figure 2: 16×2 LCD with I2C Module
 
-<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/5bdda1a9-514d-4fcd-a465-6faeeaac14db" />
+<img width="500" height="400" alt="image" src="https://github.com/user-attachments/assets/5bdda1a9-514d-4fcd-a465-6faeeaac14db" />
 
 
 ---
