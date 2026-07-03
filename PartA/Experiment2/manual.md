@@ -384,6 +384,4 @@ This experiment demonstrated the interfacing of two commonly used robotic sensor
 15. Name two real-world applications where both IR and ultrasonic sensors are used together.
 
 ---
-└── docs/
-    └── Experiment2.pdf
 ```
