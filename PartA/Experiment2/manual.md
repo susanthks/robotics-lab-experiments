@@ -176,9 +176,8 @@ The Serial Monitor displays:
 
 ### Figure 3: Complete Circuit Diagram
 
-<p align="center">
-<img src="images/circuit_diagram.png" width="750">
-</p>
+<img width="665" height="346" alt="Screenshot from 2026-07-03 20-33-37" src="https://github.com/user-attachments/assets/d125076e-dc6b-479d-923c-179f4d723271" />
+
 
 ---
 
