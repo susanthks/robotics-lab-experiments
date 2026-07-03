@@ -190,10 +190,6 @@ Save the Arduino sketch inside:
 code/Experiment2.ino
 ```
 
----
-
-# Arduino Program
-
 ```cpp
 const int irPin = 2;
 const int trigPin = 9;
@@ -389,23 +385,6 @@ This experiment demonstrated the interfacing of two commonly used robotic sensor
 15. Name two real-world applications where both IR and ultrasonic sensors are used together.
 
 ---
-
-# Repository Structure
-
-```text
-Experiment-2/
-│
-├── README.md
-├── code/
-│   └── Experiment2.ino
-│
-├── images/
-│   ├── ir_sensor.png
-│   ├── hcsr04.png
-│   ├── circuit_diagram.png
-│   ├── serial_monitor_output.png
-│   └── experimental_setup.jpg
-│
 └── docs/
     └── Experiment2.pdf
 ```
