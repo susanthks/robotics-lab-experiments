@@ -70,9 +70,8 @@ When infrared light strikes an object, it is reflected back to the receiver. The
 
 ### Figure 1: IR Obstacle Sensor
 
-<p align="center">
-<img src="images/ir_sensor.png" width="350">
-</p>
+<img width="600" height="400" alt="image" src="https://github.com/user-attachments/assets/1a9d8f18-bb1d-47bf-aa73-1347b4495599" />
+
 
 ---
 
@@ -119,9 +118,8 @@ where
 
 ### Figure 2: HC-SR04 Ultrasonic Sensor
 
-<p align="center">
-<img src="images/hcsr04.png" width="400">
-</p>
+<img width="600" height="400" alt="image" src="https://github.com/user-attachments/assets/4f1bfc42-2cdc-472d-9314-0394f4eda30d" />
+
 
 ---
 
