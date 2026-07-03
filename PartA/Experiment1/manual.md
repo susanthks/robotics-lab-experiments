@@ -133,7 +133,7 @@ The Serial Monitor is a built-in debugging tool available in the Arduino IDE.
 
 ### Figure 3: Complete Circuit Diagram
 
-file:///home/susanth/Pictures/Screenshots/Screenshot%20from%202026-07-02%2020-11-05.png
+<img width="600" height="400" alt="Screenshot from 2026-07-02 20-14-40" src="https://github.com/user-attachments/assets/388ca54e-997f-4fea-95ad-08f569039473" />
 
 ---
 
@@ -144,21 +144,52 @@ Save the Arduino sketch inside:
 ```text
 code/Experiment1.ino
 ```
+```cpp
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// Set the LCD address to 0x27 for a 16 chars and 2 line display
+// Note: Some modules use 0x3F if 0x27 does not work.
+LiquidCrystal_I2C lcd(0x27, 16, 2); 
+
+void setup() {
+  pinMode(13, OUTPUT);
+  Serial.begin(9600);
+  
+  lcd.init();          // Initialize the I2C LCD module
+  lcd.backlight();     // Turn on the LCD backlight
+  
+  lcd.print("Arduino Lab");
+  Serial.println("Experiment 1 Started");
+}
+
+void loop() {
+  digitalWrite(13, HIGH);
+  Serial.println("LED ON");
+  delay(1000);
+  
+  digitalWrite(13, LOW);
+  Serial.println("LED OFF");
+  delay(1000);
+}
+```
 
 ---
+
+
 
 # Working Principle
 
 1. Arduino initializes the Serial Monitor.
 2. The I2C LCD is initialized.
-3. The LCD displays **Arduino Lab**.
+3. The LCD displays **Robotics Lab**.
 4. The LED connected to digital pin **D13** turns ON.
 5. The Serial Monitor displays **LED ON**.
 6. After one second, the LED turns OFF.
 7. The Serial Monitor displays **LED OFF**.
 8. Steps 4–7 repeat continuously.
 
----
+
 
 # Procedure
 
@@ -180,7 +211,7 @@ code/Experiment1.ino
 ## LCD Display
 
 ```text
-Arduino Lab
+Robotics Lab
 ```
 
 ---
@@ -216,7 +247,7 @@ The LED continuously blinks with a delay of one second between ON and OFF states
 | 1 | Arduino IDE Installed | Successful |
 | 2 | Program Compilation | Successful |
 | 3 | Program Upload | Successful |
-| 4 | LCD Display | Arduino Lab |
+| 4 | LCD Display | Robotics Lab |
 | 5 | Serial Monitor Output | LED ON / LED OFF |
 | 6 | LED Operation | Blinking |
 
