@@ -351,22 +351,3 @@ This experiment demonstrated the interfacing of a DC motor with the Arduino UNO 
 
 ---
 
-# Repository Structure
-
-```text
-Experiment-3/
-│
-├── README.md
-├── code/
-│   └── Experiment3.ino
-│
-├── images/
-│   ├── dc_motor.png
-│   ├── l298n_module.png
-│   ├── circuit_diagram.png
-│   ├── serial_monitor_output.png
-│   └── experimental_setup.jpg
-│
-└── docs/
-    └── Experiment3.pdf
-```
