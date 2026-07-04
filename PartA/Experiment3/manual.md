@@ -60,9 +60,8 @@ A DC (Direct Current) motor converts electrical energy into mechanical rotationa
 
 ### Figure 1: DC Motor
 
-<p align="center">
-<img src="images/dc_motor.png" width="350">
-</p>
+<img width="204" height="192" alt="image" src="https://github.com/user-attachments/assets/0fb8c9f9-09a0-49f9-9fcf-e60b3f4fad6c" />
+
 
 ---
 
@@ -83,9 +82,8 @@ The **L298N** is a dual H-Bridge motor driver capable of driving two DC motors i
 
 ### Figure 2: L298N Motor Driver Module
 
-<p align="center">
-<img src="images/l298n_module.png" width="500">
-</p>
+<img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/365e5c39-7719-419b-8429-a34bd17d98c8" />
+
 
 ---
 
@@ -147,9 +145,8 @@ The direction of the motor depends on the logic applied to the IN1 and IN2 pins.
 
 ### Figure 3: Complete Circuit Diagram
 
-<p align="center">
-<img src="images/circuit_diagram.png" width="750">
-</p>
+<img width="1512" height="1998" alt="image" src="https://github.com/user-attachments/assets/252199ce-88cf-4576-9be6-4a0ae43efc95" />
+
 
 ---
 
