@@ -2,7 +2,7 @@
 
 ## Aim
 
-To interface a Servo Motor with an Arduino UNO and control its angular position using the Arduino Servo library.
+To interface a Servo Motor and a 10kΩ Potentiometer with an Arduino UNO and control the angular position of the servo motor based on the potentiometer input.
 
 ---
 
@@ -12,11 +12,10 @@ To interface a Servo Motor with an Arduino UNO and control its angular position 
 |-----------|----------|
 | Arduino UNO | 1 |
 | SG90 Servo Motor | 1 |
-| Breadboard (Optional) | 1 |
+| 10kΩ Potentiometer | 1 |
+| Breadboard | 1 |
 | Jumper Wires | As required |
 | USB Cable | 1 |
-
----
 
 # Software Required
 
@@ -78,8 +77,23 @@ The Arduino generates a **Pulse Width Modulation (PWM)** signal. Based on the pu
 > *(Insert labelled diagram showing DC Motor, Gearbox, Potentiometer and Control Circuit)*
 
 ---
+## Potentiometer (10kΩ)
+
+A **Potentiometer (POT)** is a three-terminal variable resistor that is commonly used to vary voltage manually. It acts as an analog input device for the Arduino. As the knob of the potentiometer is rotated, the output voltage changes from **0V to 5V**.
+
+The Arduino reads this varying voltage using the `analogRead()` function, which returns values between **0 and 1023**. These values are then mapped to the servo motor's angular range (0°–180°), allowing the servo position to be controlled by rotating the potentiometer.
+
+### Applications
+
+- Servo Position Control
+- Volume Control
+- Brightness Adjustment
+- User Input Devices
+- Robotics and Automation
 
 # Circuit Connections
+
+## Servo Motor
 
 | Servo Motor | Arduino UNO |
 |--------------|-------------|
@@ -89,54 +103,68 @@ The Arduino generates a **Pulse Width Modulation (PWM)** signal. Based on the pu
 
 ---
 
-## Figure 3: Circuit Diagram
+## Potentiometer
 
-> *(Insert circuit diagram showing Arduino UNO connected to SG90 Servo Motor)*
+| Potentiometer Pin | Arduino UNO |
+|-------------------|-------------|
+| Left Terminal | 5V |
+| Middle Terminal (Wiper) | A0 |
+| Right Terminal | GND |
+
+---
+
+## Figure 3: Complete Circuit Diagram
+
+> *(Insert circuit diagram showing Arduino UNO connected to the SG90 Servo Motor and the 10kΩ Potentiometer.)*
 
 ---
 
 # Arduino Program
-
-Save the Arduino sketch inside:
-
-```text
-code/Experiment4.ino
-```
-
 ```cpp
 #include <Servo.h>
 
 Servo myServo;
 
+const int servoPin = 9;
+const int potPin = A0;
+
+int potValue = 0;
+int angle = 0;
+
 void setup()
 {
-  myServo.attach(9);
+  myServo.attach(servoPin);
+  Serial.begin(9600);
 }
 
 void loop()
 {
-  myServo.write(0);
-  delay(1000);
+  potValue = analogRead(potPin);
 
-  myServo.write(90);
-  delay(1000);
+  angle = map(potValue, 0, 1023, 0, 180);
 
-  myServo.write(180);
-  delay(1000);
+  myServo.write(angle);
+
+  Serial.print("Potentiometer: ");
+  Serial.print(potValue);
+  Serial.print("\tServo Angle: ");
+  Serial.println(angle);
+
+  delay(15);
 }
 ```
-
 ---
 
 # Working Principle
 
-1. The Servo library is initialized.
-2. The servo motor is connected to digital pin **D9**.
-3. Arduino generates PWM signals.
-4. The servo rotates to **0°**.
-5. After one second, the servo rotates to **90°**.
-6. After another second, the servo rotates to **180°**.
-7. The sequence repeats continuously.
+1. The Arduino initializes the Servo library and Serial Monitor.
+2. The potentiometer provides a variable analog voltage to analog pin **A0**.
+3. Arduino reads the analog value (0–1023) using `analogRead()`.
+4. The `map()` function converts the analog value into an angle between **0° and 180°**.
+5. Arduino generates a PWM signal on digital pin **D9**.
+6. The servo motor rotates to the corresponding angle.
+7. The potentiometer value and servo angle are displayed on the Serial Monitor.
+8. Rotating the potentiometer changes the servo position continuously.
 
 ---
 
@@ -144,35 +172,33 @@ void loop()
 
 1. Open the Arduino IDE.
 2. Connect the Arduino UNO to the computer using a USB cable.
-3. Assemble the circuit as shown in the circuit diagram.
-4. Connect the servo motor to Arduino.
-5. Select **Tools → Board → Arduino UNO**.
-6. Select the correct COM Port.
-7. Open the Arduino sketch.
-8. Verify (compile) the program.
-9. Upload the program to the Arduino UNO.
-10. Observe the movement of the servo motor.
+3. Assemble the servo motor and potentiometer circuit as shown in the circuit diagram.
+4. Select **Tools → Board → Arduino UNO**.
+5. Select the correct COM Port.
+6. Open the Arduino sketch.
+7. Verify (compile) the program.
+8. Upload the program to the Arduino UNO.
+9. Open the Serial Monitor.
+10. Rotate the potentiometer knob and observe the movement of the servo motor.
 
 ---
 
 # Expected Output
 
-The servo motor rotates sequentially to:
+## Servo Motor
+
+The servo motor rotates smoothly from **0° to 180°** based on the position of the potentiometer.
+
+---
+
+## Serial Monitor
 
 ```text
-0°
-
-↓
-
-90°
-
-↓
-
-180°
-
-↓
-
-Repeat
+Potentiometer: 0      Servo Angle: 0
+Potentiometer: 256    Servo Angle: 45
+Potentiometer: 512    Servo Angle: 90
+Potentiometer: 768    Servo Angle: 135
+Potentiometer: 1023   Servo Angle: 180
 ```
 
 ---
@@ -194,20 +220,21 @@ Repeat
 | 1 | Circuit Connections | Successful |
 | 2 | Program Compilation | Successful |
 | 3 | Program Upload | Successful |
-| 4 | Servo Rotation | Successful |
-| 5 | Angular Movement | 0° → 90° → 180° |
+| 4 | Potentiometer Reading | 0–1023 |
+| 5 | Servo Rotation | 0°–180° |
+| 6 | Serial Monitor Output | Successful |
 
 ---
 
 # Result
 
-The Servo Motor was successfully interfaced with the Arduino UNO, and its angular position was controlled using the Arduino Servo library.
+The Servo Motor was successfully interfaced with the Arduino UNO. The angular position of the servo motor was controlled using a 10kΩ potentiometer, demonstrating analog input reading, PWM signal generation, and precise position control.
 
 ---
 
 # Conclusion
 
-This experiment demonstrated the interfacing of a Servo Motor with an Arduino UNO. The servo motor was successfully controlled using PWM signals generated by the Arduino, enabling precise angular position control. This experiment forms the basis for developing robotic arms, mobile robots, pan-tilt systems, and other automation applications.
+This experiment demonstrated how an Arduino UNO can read analog input from a potentiometer and convert it into PWM signals to control the angular position of a servo motor. The experiment provides a practical understanding of analog input processing, servo motor interfacing, and position control, which are fundamental concepts in robotics and embedded systems.
 
 ---
 
@@ -224,13 +251,14 @@ This experiment demonstrated the interfacing of a Servo Motor with an Arduino UN
 
 # Applications
 
-- Robotic Arm Control
-- Pick and Place Systems
-- Humanoid Robots
-- Pan-Tilt Camera Mechanisms
+- Robotic Arm Joint Control
+- Pan-Tilt Camera Systems
+- Robot Steering Mechanisms
+- Pick and Place Robots
+- CNC Machines
+- Industrial Automation
+- Position Control Systems
 - Autonomous Mobile Robots
-- CNC and Automation Systems
-- Smart Robotics Projects
 
 ---
 
@@ -251,5 +279,10 @@ This experiment demonstrated the interfacing of a Servo Motor with an Arduino UN
 13. Can a standard servo rotate continuously? Explain.
 14. What is the difference between a servo motor and a stepper motor?
 15. Why are servo motors preferred in robotic arm applications?
+16. 16. What is a potentiometer?
+17. Why is the potentiometer connected to an analog pin?
+18. What is the range of values returned by `analogRead()`?
+19. What is the purpose of the `map()` function?
+20. How does a potentiometer control the angular position of a servo motor?
 
 ---
