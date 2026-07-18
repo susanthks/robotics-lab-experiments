@@ -68,13 +68,15 @@ The Arduino generates a **Pulse Width Modulation (PWM)** signal. Based on the pu
 
 ## Figure 1: SG90 Servo Motor
 
-> *(Insert image of SG90 Servo Motor here)*
+<img width="554" height="554" alt="image" src="https://github.com/user-attachments/assets/3c070211-021d-4b0b-8715-acbd1b97bf85" />
+
 
 ---
 
 ## Figure 2: Servo Motor Internal Structure
 
-> *(Insert labelled diagram showing DC Motor, Gearbox, Potentiometer and Control Circuit)*
+<img width="470" height="361" alt="image" src="https://github.com/user-attachments/assets/2f445576-c84b-48f1-b436-de65fefc23e9" />
+
 
 ---
 ## Potentiometer (10kΩ)
@@ -115,7 +117,8 @@ The Arduino reads this varying voltage using the `analogRead()` function, which 
 
 ## Figure 3: Complete Circuit Diagram
 
-> *(Insert circuit diagram showing Arduino UNO connected to the SG90 Servo Motor and the 10kΩ Potentiometer.)*
+<img width="669" height="513" alt="image" src="https://github.com/user-attachments/assets/f99cdd5e-92fa-4547-a411-3ac471706df6" />
+
 
 ---
 
