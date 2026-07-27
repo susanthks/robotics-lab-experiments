@@ -1,30 +1,36 @@
-# Experiment: Mobile Robot Assembly
+# Experiment5: Mobile Robot Assembly
 
 ## Aim
 
-To assemble a two-wheel differential drive mobile robot using Arduino Uno, DC geared motors, motor driver, battery, and robot chassis.
+To assemble a two-wheel differential drive mobile robot using an Arduino Uno, DC geared motors, L298N motor driver, battery pack, and robot chassis, and to verify its basic movements.
 
 ---
 
 ## Apparatus Required
 
-- Arduino Uno
-- Robot Chassis
-- 2 × DC Geared Motors
-- 2 × Robot Wheels
-- Caster Wheel
-- L298N Motor Driver Module
-- Battery Pack 12V
-- Jumper Wires
-- Nuts and Bolts
-- Screwdriver Set
-- USB Cable
+| Sl. No | Component          | Quantity    |
+| ------ | ------------------ | ----------- |
+| 1      | Arduino Uno        | 1           |
+| 2      | Robot Chassis      | 1           |
+| 3      | DC Geared Motor    | 2           |
+| 4      | Robot Wheels       | 2           |
+| 5      | Caster Wheel       | 1           |
+| 6      | L298N Motor Driver | 1           |
+| 7      | 12V Battery Pack   | 1           |
+| 8      | Battery Holder     | Optional    |
+| 9      | Jumper Wires       | As Required |
+| 10     | USB Cable          | 1           |
+| 11     | Screwdriver Set    | 1           |
+| 12     | Nuts and Bolts     | As Required |
+
 
 ---
 
 ## Theory
 
-A **mobile robot** is a robot capable of moving from one location to another. In this experiment, a **two-wheel differential drive robot** is assembled.
+A **mobile robot** is an autonomous or manually controlled robotic system capable of moving from one location to another. Unlike fixed industrial robots, mobile robots are designed for navigation and transportation tasks.
+
+This experiment uses a **two-wheel differential drive robot**, where two independently controlled DC geared motors provide locomotion, while a caster wheel provides balance.
 
 The robot consists of:
 
@@ -36,7 +42,16 @@ The robot consists of:
 - L298N motor driver
 - Battery pack
 
-The Arduino sends control signals to the motor driver, and the motor driver powers the motors. By controlling both motors independently, the robot can move in different directions.
+The Arduino generates control signals for the motor driver. The L298N supplies sufficient current to drive the motors while allowing the Arduino to control their direction and speed using PWM.
+
+By varying the rotation of the left and right motors independently, the robot can perform various movements such as:
+
+- Forward
+- Backward
+- Left Turn
+- Right Turn
+- Stop
+
 
 ---
 
@@ -56,6 +71,8 @@ The Arduino sends control signals to the motor driver, and the motor driver powe
 ---
 
 ### Figure 1
+<img width="1920" height="1644" alt="image" src="https://github.com/user-attachments/assets/cd15e150-af10-43a6-9409-34f5e2459bd2" />
+
 
 ---
 
@@ -105,6 +122,15 @@ Complete all wiring connections.
 
 ## Circuit Connections
 
+---
+
+### figure 2
+
+<img width="1535" height="1833" alt="image" src="https://github.com/user-attachments/assets/94c7a9be-8f2d-4eac-b6e5-60460d147bc2" />
+
+
+---
+
 ### Arduino ↔ L298N
 
 | Arduino | L298N |
@@ -140,7 +166,34 @@ Arduino GND → L298N GND
 
 ---
 
-## 💻 Arduino Program
+## Working Principle
+
+The Arduino sends HIGH/LOW digital signals to the L298N motor driver.
+
+The L298N changes the polarity supplied to the DC motors according to these signals.
+
+Different combinations of motor rotations produce different robot movements.
+
+| Left Motor | Right Motor | Movement   |
+| ---------- | ----------- | ---------- |
+| Forward    | Forward     | Forward    |
+| Reverse    | Reverse     | Backward   |
+| Reverse    | Forward     | Left Turn  |
+| Forward    | Reverse     | Right Turn |
+| Stop       | Stop        | Stop       |
+
+
+---
+
+### Figure 3
+
+<img width="960" height="720" alt="image" src="https://github.com/user-attachments/assets/48f882c3-b864-4397-bcb0-5362c2417bb5" />
+
+
+
+---
+
+## Arduino Program
 
 ```cpp
 // L298N Motor Driver Connections
@@ -238,25 +291,26 @@ void stopRobot() {
 
 ## Observation
 
-| Test | Observation |
-|------|-------------|
-| Forward | ✔ |
-| Backward | ✔ |
-| Left Turn | ✔ |
-| Right Turn | ✔ |
-| Stop | ✔ |
+| Test       | Expected Result      | Observed |
+| ---------- | -------------------- | -------- |
+| Forward    | Robot moves forward  | ✔        |
+| Backward   | Robot moves backward | ✔        |
+| Left Turn  | Robot turns left     | ✔        |
+| Right Turn | Robot turns right    | ✔        |
+| Stop       | Robot stops          | ✔        |
+
 
 ---
 
 ## Result
 
-The mobile robot was successfully assembled and tested. The robot moved correctly in all directions.
+The mobile robot was successfully assembled and tested. The robot performed forward, backward, left, right, and stop movements correctly, demonstrating successful integration of the mechanical, electrical, and programming components.
 
 ---
 
 ## Conclusion
 
-In this experiment, a two-wheel differential drive mobile robot was successfully assembled by integrating the mechanical chassis, DC geared motors, Arduino Uno, L298N motor driver, and power supply. The assembled robot was tested and demonstrated correct forward, backward, left, and right movements. This experiment provided practical experience in robot assembly, wiring, and basic motion control, forming the foundation for future robotics applications such as line following, obstacle avoidance, and autonomous navigation.
+In this experiment, a two-wheel differential drive mobile robot was successfully assembled using an Arduino Uno, L298N motor driver, DC geared motors, and a robot chassis. The experiment provided hands-on experience in mechanical assembly, electrical interfacing, motor control, and basic robot programming. The completed robot forms the basis for implementing advanced robotic applications such as line following, obstacle avoidance, wireless control, and autonomous navigation.
 
 ---
 
