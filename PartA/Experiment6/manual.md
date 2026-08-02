@@ -102,7 +102,8 @@ When a command is sent from the smartphone:
 
 **Arduino Uno – HM-10 BLE Module Connection**
 
-<img width="405" height="369" alt="image" src="https://github.com/user-attachments/assets/2ee28c11-e780-4481-bbee-4b6cab0cb8a6" />
+<img width="1500" height="1267" alt="image" src="https://github.com/user-attachments/assets/24ff38a3-28e4-4469-9bf3-15814d3a1354" />
+
 
 ---
 
