@@ -89,7 +89,8 @@ In this experiment:
 
 **Raspberry Pi 4 Board Layout**
 
-*(Insert a labeled image of the Raspberry Pi showing USB ports, HDMI, GPIO header, Ethernet, Power Port, CSI and DSI connectors.)*
+<img width="1500" height="946" alt="image" src="https://github.com/user-attachments/assets/462b3d70-9b14-4fef-a43c-3101c9245021" />
+
 
 ---
 
@@ -97,7 +98,8 @@ In this experiment:
 
 **40-Pin GPIO Pinout**
 
-*(Insert the Raspberry Pi GPIO pinout diagram.)*
+<img width="1000" height="873" alt="image" src="https://github.com/user-attachments/assets/3b8997af-0b9a-4049-9d2d-e3eaca954004" />
+
 
 ---
 
@@ -119,6 +121,10 @@ This demonstrates basic GPIO input and output interfacing.
 ## Figure 3
 
 **LED and Push Button Interfacing with Raspberry Pi**
+
+<img width="1440" height="990" alt="image" src="https://github.com/user-attachments/assets/0a433723-ad1e-4f56-8fbc-2b171d20f1ff" />
+
+<img width="656" height="500" alt="image" src="https://github.com/user-attachments/assets/3bff41d4-e317-4ad5-b4bd-b5c4e2711cbe" />
 
 ---
 
