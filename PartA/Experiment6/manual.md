@@ -77,7 +77,8 @@ The BLE module acts as a bridge between the smartphone and the Arduino.
 
 **Bluetooth Low Energy Communication System**
 
-*(Insert a diagram showing Smartphone → BLE → HM-10 → Arduino.)*
+<img width="1200" height="630" alt="image" src="https://github.com/user-attachments/assets/f40a717d-9579-40a3-8b7e-3d9e16f6c641" />
+
 
 ---
 
@@ -100,6 +101,8 @@ When a command is sent from the smartphone:
 ## Figure 2
 
 **Arduino Uno – HM-10 BLE Module Connection**
+
+<img width="405" height="369" alt="image" src="https://github.com/user-attachments/assets/2ee28c11-e780-4481-bbee-4b6cab0cb8a6" />
 
 ---
 
