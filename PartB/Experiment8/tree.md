@@ -21,10 +21,10 @@ ros2_ws/
 ```python
 entry_points={
     'console_scripts': [
-        'publisher = communication_demo.publisher:main',
-        'subscriber = communication_demo.subscriber:main',
-        'service = communication_demo.service:main',
-        'client = communication_demo.client:main',
+        'publisher = pub_sub_py.publisher:main',
+        'subscriber = pub_sub_py.subscriber:main',
+        'service = pub_sub_py.service:main',
+        'client = pub_sub_py.client:main',
     ],
 },
 ```
