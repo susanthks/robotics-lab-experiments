@@ -200,7 +200,7 @@ source install/setup.bash
 ```bash
 cd ~/ros2_ws/src
 
-ros2 pkg create --build-type ament_python communication_demo --dependencies rclpy std_msgs
+ros2 pkg create --build-type ament_python pub_sub_py --dependencies rclpy std_msgs
 ```
 
 ---
@@ -271,7 +271,7 @@ source install/setup.bash
 Open **Terminal 1**
 
 ```bash
-ros2 run communication_demo publisher
+ros2 run pub_sub_py publisher
 ```
 
 ---
@@ -283,7 +283,7 @@ Open **Terminal 2**
 ```bash
 source ~/ros2_ws/install/setup.bash
 
-ros2 run communication_demo subscriber
+ros2 run pub_sub_py subscriber
 ```
 
 Expected Output
@@ -358,7 +358,7 @@ colcon build
 Terminal 1
 
 ```bash
-ros2 run communication_demo service
+ros2 run pub_sub_py service
 ```
 
 ---
@@ -368,7 +368,7 @@ ros2 run communication_demo service
 Terminal 2
 
 ```bash
-ros2 run communication_demo client
+ros2 run pub_sub_py client
 ```
 
 Expected Output
@@ -384,7 +384,7 @@ Result = 30
 ### Step 18: Start Publisher
 
 ```bash
-ros2 run communication_demo publisher
+ros2 run pub_sub_py publisher
 ```
 
 ---
