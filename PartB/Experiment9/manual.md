@@ -566,123 +566,404 @@ nano worlds/localization_world.sdf
 Add:
 
 ```xml
+
 <?xml version="1.0"?>
 
-<sdf version="1.8">
+<robot name="mini_rover">
 
-  <world name="localization_world">
+  <!-- ============================================================ -->
+  <!-- BASE LINK -->
+  <!-- ============================================================ -->
 
-    <include>
-      <uri>model://ground_plane</uri>
-    </include>
+  <link name="base_link">
 
-    <include>
-      <uri>model://sun</uri>
-    </include>
+    <visual>
+      <geometry>
+        <box size="0.40 0.30 0.10"/>
+      </geometry>
 
-    <!-- Obstacle 1 -->
+      <material name="blue">
+        <color rgba="0.2 0.4 0.8 1.0"/>
+      </material>
+    </visual>
 
-    <model name="box_1">
+    <collision>
+      <geometry>
+        <box size="0.40 0.30 0.10"/>
+      </geometry>
+    </collision>
 
-      <static>true</static>
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="5.0"/>
 
-      <pose>2 0 0.5 0 0 0</pose>
+      <inertia
+        ixx="0.05"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.05"
+        iyz="0.0"
+        izz="0.10"/>
+    </inertial>
 
-      <link name="link">
+  </link>
 
-        <collision name="collision">
 
-          <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
-          </geometry>
+  <!-- ============================================================ -->
+  <!-- FRONT LEFT WHEEL -->
+  <!-- ============================================================ -->
 
-        </collision>
+  <link name="front_left_wheel">
 
-        <visual name="visual">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
 
-          <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
-          </geometry>
+      <geometry>
+        <cylinder radius="0.05" length="0.03"/>
+      </geometry>
 
-        </visual>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
 
-      </link>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
 
-    </model>
+      <geometry>
+        <cylinder radius="0.05" length="0.03"/>
+      </geometry>
+    </collision>
 
-    <!-- Obstacle 2 -->
+    <inertial>
+      <mass value="0.2"/>
 
-    <model name="box_2">
+      <inertia
+        ixx="0.0002"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.0002"
+        iyz="0.0"
+        izz="0.0002"/>
+    </inertial>
 
-      <static>true</static>
+  </link>
 
-      <pose>-2 1 0.5 0 0 0</pose>
 
-      <link name="link">
+  <!-- ============================================================ -->
+  <!-- FRONT RIGHT WHEEL -->
+  <!-- ============================================================ -->
 
-        <collision name="collision">
+  <link name="front_right_wheel">
 
-          <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
-          </geometry>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
 
-        </collision>
+      <geometry>
+        <cylinder radius="0.05" length="0.03"/>
+      </geometry>
 
-        <visual name="visual">
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
 
-          <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
-          </geometry>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
 
-        </visual>
+      <geometry>
+        <cylinder radius="0.05" length="0.03"/>
+      </geometry>
+    </collision>
 
-      </link>
+    <inertial>
+      <mass value="0.2"/>
 
-    </model>
+      <inertia
+        ixx="0.0002"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.0002"
+        iyz="0.0"
+        izz="0.0002"/>
+    </inertial>
 
-    <!-- Obstacle 3 -->
+  </link>
 
-    <model name="box_3">
 
-      <static>true</static>
+  <!-- ============================================================ -->
+  <!-- REAR LEFT WHEEL -->
+  <!-- ============================================================ -->
 
-      <pose>0 -2 0.5 0 0 0</pose>
+  <link name="rear_left_wheel">
 
-      <link name="link">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
 
-        <collision name="collision">
+      <geometry>
+        <cylinder radius="0.05" length="0.03"/>
+      </geometry>
 
-          <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
-          </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
 
-        </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
 
-        <visual name="visual">
+      <geometry>
+        <cylinder radius="0.05" length="0.03"/>
+      </geometry>
+    </collision>
 
-          <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
-          </geometry>
+    <inertial>
+      <mass value="0.2"/>
 
-        </visual>
+      <inertia
+        ixx="0.0002"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.0002"
+        iyz="0.0"
+        izz="0.0002"/>
+    </inertial>
 
-      </link>
+  </link>
 
-    </model>
 
-  </world>
+  <!-- ============================================================ -->
+  <!-- REAR RIGHT WHEEL -->
+  <!-- ============================================================ -->
+
+  <link name="rear_right_wheel">
+
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+
+      <geometry>
+        <cylinder radius="0.05" length="0.03"/>
+      </geometry>
+
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+
+      <geometry>
+        <cylinder radius="0.05" length="0.03"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.2"/>
+
+      <inertia
+        ixx="0.0002"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.0002"
+        iyz="0.0"
+        izz="0.0002"/>
+    </inertial>
+
+  </link>
+
+
+  <!-- ============================================================ -->
+  <!-- LiDAR -->
+  <!-- ============================================================ -->
+
+  <link name="laser_link">
+
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.05"/>
+      </geometry>
+
+      <material name="lidar_black">
+        <color rgba="0.05 0.05 0.05 1.0"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.04" length="0.05"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.10"/>
+
+      <inertia
+        ixx="0.0001"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.0001"
+        iyz="0.0"
+        izz="0.0001"/>
+    </inertial>
+
+  </link>
+
+
+  <!-- ============================================================ -->
+  <!-- WHEEL JOINTS -->
+  <!-- ============================================================ -->
+
+  <joint name="front_left_joint" type="continuous">
+
+    <parent link="base_link"/>
+    <child link="front_left_wheel"/>
+
+    <origin xyz="0.12 0.16 -0.05"/>
+
+    <axis xyz="0 1 0"/>
+
+  </joint>
+
+
+  <joint name="front_right_joint" type="continuous">
+
+    <parent link="base_link"/>
+    <child link="front_right_wheel"/>
+
+    <origin xyz="0.12 -0.16 -0.05"/>
+
+    <axis xyz="0 1 0"/>
+
+  </joint>
+
+
+  <joint name="rear_left_joint" type="continuous">
+
+    <parent link="base_link"/>
+    <child link="rear_left_wheel"/>
+
+    <origin xyz="-0.12 0.16 -0.05"/>
+
+    <axis xyz="0 1 0"/>
+
+  </joint>
+
+
+  <joint name="rear_right_joint" type="continuous">
+
+    <parent link="base_link"/>
+    <child link="rear_right_wheel"/>
+
+    <origin xyz="-0.12 -0.16 -0.05"/>
+
+    <axis xyz="0 1 0"/>
+
+  </joint>
+
+
+  <!-- ============================================================ -->
+  <!-- LiDAR JOINT -->
+  <!-- ============================================================ -->
+
+  <joint name="laser_joint" type="fixed">
+
+    <parent link="base_link"/>
+
+    <child link="laser_link"/>
+
+    <!-- LiDAR mounted on top of robot -->
+
+    <origin xyz="0 0 0.10" rpy="0 0 0"/>
+
+  </joint>
+
+
+  <!-- ============================================================ -->
+  <!-- GAZEBO DIFFERENTIAL DRIVE -->
+  <!-- ============================================================ -->
+
+  <gazebo>
+
+    <plugin
+      filename="gz-sim-diff-drive-system"
+      name="gz::sim::systems::DiffDrive">
+
+      <left_joint>front_left_joint</left_joint>
+      <left_joint>rear_left_joint</left_joint>
+
+      <right_joint>front_right_joint</right_joint>
+      <right_joint>rear_right_joint</right_joint>
+
+      <wheel_separation>0.32</wheel_separation>
+
+      <wheel_radius>0.05</wheel_radius>
+
+      <topic>cmd_vel</topic>
+
+      <odom_topic>odom</odom_topic>
+
+      <frame_id>odom</frame_id>
+
+      <child_frame_id>base_link</child_frame_id>
+
+    </plugin>
+
+  </gazebo>
+
+
+  <!-- ============================================================ -->
+  <!-- GAZEBO 2D LiDAR SENSOR -->
+  <!-- ============================================================ -->
+
+  <gazebo reference="laser_link">
+
+    <sensor name="lidar" type="gpu_lidar">
+
+      <always_on>true</always_on>
+
+      <update_rate>10</update_rate>
+
+      <topic>scan</topic>
+
+      <gz_frame_id>laser_link</gz_frame_id>
+
+      <ray>
+
+        <scan>
+
+          <horizontal>
+
+            <samples>360</samples>
+
+            <resolution>1</resolution>
+
+            <min_angle>-3.14159</min_angle>
+
+            <max_angle>3.14159</max_angle>
+
+          </horizontal>
+
+        </scan>
+
+        <range>
+
+          <min>0.12</min>
+
+          <max>8.0</max>
+
+          <resolution>0.01</resolution>
+
+        </range>
+
+      </ray>
+
+    </sensor>
+
+  </gazebo>
+
+
+</robot>
 
 </sdf>
 ```
