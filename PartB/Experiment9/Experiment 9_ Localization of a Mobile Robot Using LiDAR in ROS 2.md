@@ -1,8 +1,8 @@
-# Experiment 9: Localization of a Mobile Robot Using LiDAR in ROS 2
+# Experiment 9: Localization of a Mobile Robot Using LiDAR
 
 ## Aim
 
-To perform localization of a mobile robot using **LiDAR sensor data** in ROS 2 Jazzy Jalisco and estimate the position and orientation of the robot in a known environment using the **AMCL (Adaptive Monte Carlo Localization)** algorithm.
+To simulate a custom mobile robot equipped with a 2D LiDAR sensor in ROS 2 Jazzy and perform robot localization using LiDAR data, odometry, a known map, and the AMCL localization algorithm.
 
 ---
 
@@ -10,28 +10,32 @@ To perform localization of a mobile robot using **LiDAR sensor data** in ROS 2 J
 
 After completing this experiment, students will be able to:
 
-- Understand the concept of robot localization.
-- Understand the role of LiDAR in mobile robot localization.
-- Create a map of an environment using SLAM.
+- Create and simulate a custom mobile robot in ROS 2.
+- Understand the structure of a robot description package.
+- Create a robot model using URDF.
+- Add a simulated 2D LiDAR sensor to the robot.
+- Launch the robot in Gazebo Harmonic.
+- Bridge LiDAR data from Gazebo to ROS 2.
+- Visualize LiDAR data in RViz2.
+- Generate a map using SLAM Toolbox.
 - Save and load an occupancy grid map.
-- Visualize LiDAR data using RViz2.
-- Use AMCL for robot localization.
-- Estimate the position and orientation of a mobile robot.
-- Understand the relationship between the `map`, `odom`, `base_link`, and LiDAR coordinate frames.
+- Understand robot odometry.
+- Perform localization using AMCL.
+- Visualize the estimated robot pose.
 
 ---
 
 # Theory
 
-## What is Robot Localization?
+## Robot Localization
 
-Localization is the process of determining the position and orientation of a robot within its environment.
+Robot localization is the process of determining the position and orientation of a robot within an environment.
 
 In simple terms, localization answers the question:
 
 > **Where is the robot?**
 
-The pose of a mobile robot in a two-dimensional environment can be represented as:
+The pose of a mobile robot in a two-dimensional environment is represented as:
 
 ```text
 (x, y, θ)
@@ -39,50 +43,52 @@ The pose of a mobile robot in a two-dimensional environment can be represented a
 
 Where:
 
-- `x` represents the position along the X-axis.
-- `y` represents the position along the Y-axis.
-- `θ` represents the orientation of the robot.
+- `x` is the position along the X-axis.
+- `y` is the position along the Y-axis.
+- `θ` is the orientation of the robot.
 
 ---
 
-# Role of LiDAR
+# LiDAR
 
 LiDAR stands for **Light Detection and Ranging**.
 
 A LiDAR sensor measures the distance between the robot and surrounding objects.
 
-In ROS 2, LiDAR data is commonly published through the following topic:
+In this experiment, the custom robot uses a simulated 2D LiDAR sensor.
+
+The sensor publishes data through:
 
 ```text
 /scan
 ```
 
-The message type is generally:
+The ROS 2 message type is:
 
 ```text
 sensor_msgs/msg/LaserScan
 ```
 
-The robot uses LiDAR measurements to detect walls and obstacles around it.
+The robot uses the laser scan data to detect surrounding walls and obstacles.
 
 ```text
               Wall
-   ─────────────────────────
+    ──────────────────────
 
-          ●  ●  ●
-       ●           ●
-     ●     ROBOT     ●
-       ●           ●
-          ●  ●  ●
+         *   *   *
+       *           *
+     *    ROBOT      *
+       *           *
+         *   *   *
 ```
-
-The measured distances can be compared with a previously created map to estimate the position of the robot.
 
 ---
 
 # AMCL
 
-**AMCL** stands for **Adaptive Monte Carlo Localization**.
+AMCL stands for:
+
+**Adaptive Monte Carlo Localization**
 
 AMCL is a probabilistic localization algorithm based on a particle filter.
 
@@ -92,54 +98,56 @@ It uses:
 - LiDAR sensor data
 - Robot odometry
 
-to estimate the position and orientation of the robot.
+to estimate the robot's pose.
 
 ```text
-                    Known Map
-                        │
-                        ▼
-LiDAR Data ───────► AMCL ◄─────── Odometry
-   (/scan)              │             (/odom)
-                        │
-                        ▼
-              Estimated Robot Pose
-                  (/amcl_pose)
+                 Known Map
+                     │
+                     ▼
+LiDAR Data ───────► AMCL ◄────── Odometry
+  (/scan)             │             (/odom)
+                      │
+                      ▼
+             Estimated Robot Pose
+                 (/amcl_pose)
 ```
-
-AMCL in Nav2 is designed for 2D localization using a known map and laser scan data.
 
 ---
 
 # ROS 2 Localization Workflow
 
-The complete workflow used in this experiment is:
+The complete workflow of this experiment is:
 
 ```text
-                 ┌──────────────────┐
-                 │   Mobile Robot   │
-                 └────────┬─────────┘
-                          │
-                 LiDAR + Odometry
-                          │
-                          ▼
-                    SLAM Toolbox
-                          │
-                          ▼
-                    Create Map
-                          │
-                          ▼
-                     Save Map
-                          │
-                          ▼
-                  Known Environment
-                          │
-                          ▼
-                       AMCL
-                          │
-              ┌───────────┴───────────┐
-              ▼                       ▼
-        Robot Pose                  RViz2
-       (/amcl_pose)
+             Custom Mobile Robot
+                      │
+          ┌───────────┴───────────┐
+          │                       │
+          ▼                       ▼
+      Odometry                  LiDAR
+      /odom                     /scan
+          │                       │
+          └───────────┬───────────┘
+                      ▼
+                 SLAM Toolbox
+                      │
+                      ▼
+                    /map
+                      │
+                      ▼
+                  Save Map
+                      │
+                      ▼
+                  Known Map
+                      │
+                      ▼
+                     AMCL
+                      │
+                      ▼
+                 /amcl_pose
+                      │
+                      ▼
+                     RViz2
 ```
 
 ---
@@ -149,18 +157,19 @@ The complete workflow used in this experiment is:
 | Topic | Description |
 |---|---|
 | `/scan` | LiDAR sensor data |
-| `/map` | Occupancy grid map |
 | `/odom` | Robot odometry |
+| `/map` | Occupancy grid map |
 | `/tf` | Coordinate transformations |
-| `/tf_static` | Static coordinate transformations |
+| `/tf_static` | Static transformations |
+| `/cmd_vel` | Velocity command |
 | `/amcl_pose` | Estimated robot pose |
-| `/cmd_vel` | Robot velocity commands |
+| `/initialpose` | Initial pose for AMCL |
 
 ---
 
 # Coordinate Frames
 
-A typical mobile robot localization system contains the following coordinate frames:
+The robot coordinate frames used in this experiment are:
 
 ```text
 map
@@ -172,17 +181,15 @@ odom
 base_link
  │
  ▼
-base_scan
+laser_link
 ```
 
 Where:
 
 - `map` represents the global environment.
-- `odom` represents the robot odometry frame.
-- `base_link` represents the robot body.
-- `base_scan` represents the LiDAR sensor.
-
-The exact LiDAR frame name may vary depending on the robot model.
+- `odom` represents the odometry reference frame.
+- `base_link` represents the main body of the robot.
+- `laser_link` represents the LiDAR sensor frame.
 
 ---
 
@@ -190,24 +197,24 @@ The exact LiDAR frame name may vary depending on the robot model.
 
 - Ubuntu 24.04 LTS
 - ROS 2 Jazzy Jalisco
-- Gazebo
+- Gazebo Harmonic
 - RViz2
-- TurtleBot3 simulation
-- Navigation2 (Nav2)
+- ROS-Gazebo Bridge
 - SLAM Toolbox
-- Teleoperation package
+- Navigation2
+- AMCL
+- Python 3
 
 ---
 
-# Part A – Install Required Packages
+# Part A – Create the Workspace
 
-## Step 1: Update the System
+## Step 1: Open Terminal
 
-Open a terminal and execute:
+Open a terminal using:
 
-```bash
-sudo apt update
-sudo apt upgrade
+```text
+Ctrl + Alt + T
 ```
 
 ---
@@ -218,7 +225,7 @@ sudo apt upgrade
 source /opt/ros/jazzy/setup.bash
 ```
 
-To automatically source ROS 2 when opening a new terminal:
+To automatically source ROS 2:
 
 ```bash
 echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
@@ -227,123 +234,597 @@ source ~/.bashrc
 
 ---
 
-## Step 3: Verify ROS 2 Installation
+## Step 3: Create a Workspace
 
 ```bash
-ros2 --version
+mkdir -p ~/lidar_bot_ws/src
+cd ~/lidar_bot_ws
 ```
 
-Check the available ROS distribution:
+---
+
+## Step 4: Create the Robot Description Package
 
 ```bash
-echo $ROS_DISTRO
+cd ~/lidar_bot_ws/src
+
+ros2 pkg create my_robot_description \
+--build-type ament_python
+```
+
+Create the required directories:
+
+```bash
+cd ~/lidar_bot_ws/src/my_robot_description
+
+mkdir launch
+mkdir urdf
+mkdir worlds
+mkdir rviz
+mkdir config
+mkdir maps
+```
+
+The package structure should be:
+
+```text
+my_robot_description/
+├── config/
+├── launch/
+├── maps/
+├── my_robot_description/
+│   └── __init__.py
+├── resource/
+│   └── my_robot_description
+├── rviz/
+├── urdf/
+├── worlds/
+├── package.xml
+├── setup.cfg
+└── setup.py
+```
+
+---
+
+# Part B – Configure the Package
+
+## Step 5: Update `package.xml`
+
+Open:
+
+```bash
+nano package.xml
+```
+
+Add the following dependencies before the closing `</package>` tag:
+
+```xml
+<exec_depend>robot_state_publisher</exec_depend>
+<exec_depend>rviz2</exec_depend>
+<exec_depend>ros_gz_sim</exec_depend>
+<exec_depend>ros_gz_bridge</exec_depend>
+<exec_depend>tf2_ros</exec_depend>
+```
+
+Save using:
+
+```text
+Ctrl + O
+```
+
+Press:
+
+```text
+Enter
+```
+
+Exit using:
+
+```text
+Ctrl + X
+```
+
+---
+
+## Step 6: Configure `setup.py`
+
+Replace the contents of `setup.py` with:
+
+```python
+from setuptools import find_packages, setup
+from glob import glob
+import os
+
+package_name = 'my_robot_description'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        (
+            'share/ament_index/resource_index/packages',
+            ['resource/' + package_name]
+        ),
+        (
+            'share/' + package_name,
+            ['package.xml']
+        ),
+        (
+            os.path.join('share', package_name, 'launch'),
+            glob('launch/*.py')
+        ),
+        (
+            os.path.join('share', package_name, 'urdf'),
+            glob('urdf/*')
+        ),
+        (
+            os.path.join('share', package_name, 'worlds'),
+            glob('worlds/*')
+        ),
+        (
+            os.path.join('share', package_name, 'rviz'),
+            glob('rviz/*')
+        ),
+        (
+            os.path.join('share', package_name, 'maps'),
+            glob('maps/*')
+        ),
+        (
+            os.path.join('share', package_name, 'config'),
+            glob('config/*')
+        ),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='student',
+    maintainer_email='student@example.com',
+    description='Custom mobile robot with LiDAR for ROS 2 localization',
+    license='Apache-2.0',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [],
+    },
+)
+```
+
+---
+
+## Step 7: Verify `setup.cfg`
+
+Ensure that `setup.cfg` contains:
+
+```ini
+[develop]
+script_dir=$base/lib/my_robot_description
+
+[install]
+install_scripts=$base/lib/my_robot_description
+```
+
+---
+
+# Part C – Create the Custom Robot
+
+## Step 8: Create the Robot URDF
+
+Create:
+
+```bash
+nano urdf/robot.urdf
+```
+
+Add the following robot description:
+
+```xml
+<?xml version="1.0"?>
+
+<robot name="mini_rover">
+
+  <!-- Robot Base -->
+
+  <link name="base_link">
+
+    <visual>
+      <geometry>
+        <box size="0.3 0.2 0.1"/>
+      </geometry>
+
+      <material name="blue">
+        <color rgba="0.2 0.4 0.8 1.0"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.3 0.2 0.1"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="2.0"/>
+
+      <origin xyz="0 0 0"/>
+
+      <inertia
+        ixx="0.02"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.02"
+        iyz="0.0"
+        izz="0.02"/>
+    </inertial>
+
+  </link>
+
+  <!-- LiDAR Sensor -->
+
+  <link name="laser_link">
+
+    <visual>
+      <geometry>
+        <cylinder radius="0.03" length="0.05"/>
+      </geometry>
+
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+
+    </visual>
+
+  </link>
+
+  <!-- LiDAR Joint -->
+
+  <joint name="laser_joint" type="fixed">
+
+    <parent link="base_link"/>
+
+    <child link="laser_link"/>
+
+    <origin xyz="0.1 0 0.08" rpy="0 0 0"/>
+
+  </joint>
+
+  <!-- Gazebo LiDAR -->
+
+  <gazebo reference="laser_link">
+
+    <sensor name="lidar" type="gpu_lidar">
+
+      <update_rate>10</update_rate>
+
+      <topic>scan</topic>
+
+      <gz_frame_id>laser_link</gz_frame_id>
+
+      <ray>
+
+        <scan>
+
+          <horizontal>
+
+            <samples>360</samples>
+
+            <resolution>1</resolution>
+
+            <min_angle>-3.14159</min_angle>
+
+            <max_angle>3.14159</max_angle>
+
+          </horizontal>
+
+        </scan>
+
+        <range>
+
+          <min>0.12</min>
+
+          <max>8.0</max>
+
+        </range>
+
+      </ray>
+
+    </sensor>
+
+  </gazebo>
+
+</robot>
+```
+
+The custom robot model contains a `base_link`, fixed `laser_link`, and a Gazebo GPU LiDAR sensor configured with 360 samples and a scan range of 0.12 m to 8.0 m. :contentReference[oaicite:1]{index=1}
+
+---
+
+## Step 9: Verify the URDF
+
+Run:
+
+```bash
+check_urdf urdf/robot.urdf
 ```
 
 Expected output:
 
 ```text
-jazzy
+Successfully Parsed XML
 ```
 
 ---
 
-## Step 4: Install Navigation and Localization Packages
+# Part D – Create the Gazebo World
 
-Install Nav2:
+## Step 10: Create the World File
 
-```bash
-sudo apt install ros-jazzy-navigation2 ros-jazzy-nav2-bringup
-```
-
-Install AMCL:
+Create:
 
 ```bash
-sudo apt install ros-jazzy-nav2-amcl
+nano worlds/localization_world.sdf
 ```
 
-Install SLAM Toolbox:
+Add:
 
-```bash
-sudo apt install ros-jazzy-slam-toolbox
+```xml
+<?xml version="1.0"?>
+
+<sdf version="1.8">
+
+  <world name="localization_world">
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- Obstacle 1 -->
+
+    <model name="box_1">
+
+      <static>true</static>
+
+      <pose>2 0 0.5 0 0 0</pose>
+
+      <link name="link">
+
+        <collision name="collision">
+
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+
+        </collision>
+
+        <visual name="visual">
+
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+
+        </visual>
+
+      </link>
+
+    </model>
+
+    <!-- Obstacle 2 -->
+
+    <model name="box_2">
+
+      <static>true</static>
+
+      <pose>-2 1 0.5 0 0 0</pose>
+
+      <link name="link">
+
+        <collision name="collision">
+
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+
+        </collision>
+
+        <visual name="visual">
+
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+
+        </visual>
+
+      </link>
+
+    </model>
+
+    <!-- Obstacle 3 -->
+
+    <model name="box_3">
+
+      <static>true</static>
+
+      <pose>0 -2 0.5 0 0 0</pose>
+
+      <link name="link">
+
+        <collision name="collision">
+
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+
+        </collision>
+
+        <visual name="visual">
+
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+
+        </visual>
+
+      </link>
+
+    </model>
+
+  </world>
+
+</sdf>
 ```
 
-Install keyboard teleoperation:
-
-```bash
-sudo apt install ros-jazzy-teleop-twist-keyboard
-```
-
-SLAM Toolbox is the supported ROS 2 SLAM package used in the Nav2 workflow, and Nav2 documentation describes using it to generate occupancy-grid maps that can later be saved.
+The obstacles provide surfaces that generate LiDAR returns. The provided robot simulation material uses a static box obstacle specifically for this purpose. :contentReference[oaicite:2]{index=2}
 
 ---
 
-# Part B – Install TurtleBot3
+# Part E – Create the Simulation Launch File
 
-## Step 5: Install TurtleBot3 Packages
+## Step 11: Create `sim.launch.py`
 
-For a Jazzy-based setup, first install the available TurtleBot3 dependencies and packages appropriate to your installation.
+Create:
 
 ```bash
-sudo apt update
-
-sudo apt install ros-jazzy-turtlebot3 \
-                 ros-jazzy-turtlebot3-msgs \
-                 ros-jazzy-turtlebot3-bringup
+nano launch/sim.launch.py
 ```
 
-If these packages are unavailable in your configured repository, TurtleBot3 can be built from its Jazzy branch in a workspace. The ROBOTIS TurtleBot3 documentation confirms testing with Ubuntu 24.04 and ROS 2 Jazzy.
+Add:
+
+```python
+from launch import LaunchDescription
+from launch.actions import ExecuteProcess
+from launch_ros.actions import Node
+from ament_index_python.packages import get_package_share_directory
+
+import os
+
+
+def generate_launch_description():
+
+    pkg_path = get_package_share_directory(
+        'my_robot_description'
+    )
+
+    urdf_file = os.path.join(
+        pkg_path,
+        'urdf',
+        'robot.urdf'
+    )
+
+    world_file = os.path.join(
+        pkg_path,
+        'worlds',
+        'localization_world.sdf'
+    )
+
+    with open(urdf_file, 'r') as file:
+        robot_description = file.read()
+
+    return LaunchDescription([
+
+        ExecuteProcess(
+            cmd=[
+                'gz',
+                'sim',
+                '-r',
+                world_file
+            ],
+            output='screen'
+        ),
+
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            parameters=[{
+                'robot_description': robot_description,
+                'use_sim_time': True
+            }],
+            output='screen'
+        ),
+
+        Node(
+            package='ros_gz_sim',
+            executable='create',
+            arguments=[
+                '-string',
+                robot_description,
+                '-name',
+                'mini_rover'
+            ],
+            output='screen'
+        ),
+
+        Node(
+            package='ros_gz_bridge',
+            executable='parameter_bridge',
+            arguments=[
+                '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+                '/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan'
+            ],
+            output='screen'
+        )
+
+    ])
+```
+
+The supplied launch-file structure starts Gazebo, publishes the robot state, spawns the `mini_rover`, and bridges the clock and LiDAR scan data between Gazebo and ROS 2. :contentReference[oaicite:3]{index=3}
 
 ---
 
-## Step 6: Set the TurtleBot3 Model
+# Part F – Build and Run the Simulation
 
-For this experiment, use the TurtleBot3 Burger model.
-
-```bash
-echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
-source ~/.bashrc
-```
-
-Verify:
+## Step 12: Build the Workspace
 
 ```bash
-echo $TURTLEBOT3_MODEL
-```
+cd ~/lidar_bot_ws
 
-Expected output:
-
-```text
-burger
+colcon build --symlink-install
 ```
 
 ---
 
-# Part C – Launch the Robot Simulation
-
-## Step 7: Launch TurtleBot3 Simulation
-
-Open a terminal:
+## Step 13: Source the Workspace
 
 ```bash
-source /opt/ros/jazzy/setup.bash
+source install/setup.bash
 ```
-
-Launch the robot simulation:
-
-```bash
-ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
-```
-
-Gazebo should open with the TurtleBot3 robot.
 
 ---
 
-## Step 8: Check Available ROS Topics
+## Step 14: Launch the Custom Robot
+
+```bash
+ros2 launch my_robot_description sim.launch.py
+```
+
+Gazebo Harmonic should open and display the custom `mini_rover`.
+
+---
+
+# Part G – Verify LiDAR Data
+
+## Step 15: Check Available Topics
 
 Open another terminal:
 
 ```bash
+cd ~/lidar_bot_ws
+
 source /opt/ros/jazzy/setup.bash
+source install/setup.bash
 ```
 
 Run:
@@ -352,70 +833,31 @@ Run:
 ros2 topic list
 ```
 
-You should observe topics similar to:
+Check for:
 
 ```text
-/cmd_vel
-/odom
 /scan
-/tf
-/tf_static
 ```
 
 ---
 
-# Part D – Visualize LiDAR Data
-
-## Step 9: Start RViz2
-
-Open another terminal:
-
-```bash
-source /opt/ros/jazzy/setup.bash
-rviz2
-```
-
----
-
-## Step 10: Add LiDAR Visualization
-
-In RViz2:
-
-1. Click **Add**.
-2. Select **By Topic**.
-3. Select the `/scan` topic.
-4. Add **LaserScan**.
-
-The LiDAR scan points should appear around the robot.
-
----
-
-## Step 11: Check LiDAR Data
-
-Run:
+## Step 16: Display LiDAR Messages
 
 ```bash
 ros2 topic echo /scan
 ```
 
-You should see LaserScan data.
-
-Example:
+You should observe messages of type:
 
 ```text
-header:
-  frame_id: base_scan
-
-angle_min: ...
-angle_max: ...
-
-ranges:
-- 1.25
-- 1.30
-- 1.28
+sensor_msgs/msg/LaserScan
 ```
 
-Check topic information:
+The `ranges` array contains distance measurements from the LiDAR sensor.
+
+---
+
+## Step 17: Check LiDAR Topic Information
 
 ```bash
 ros2 topic info /scan
@@ -423,20 +865,77 @@ ros2 topic info /scan
 
 ---
 
-# Part E – Create a Map Using SLAM
+# Part H – Visualize LiDAR Data in RViz2
 
-Localization requires a previously created map.
+## Step 18: Start RViz2
 
-In this section, the robot will first create a map using LiDAR.
+```bash
+rviz2
+```
 
 ---
 
-## Step 12: Launch SLAM Toolbox
+## Step 19: Configure RViz2
 
-Open a new terminal:
+1. Set **Fixed Frame** to:
+
+```text
+base_link
+```
+
+2. Click **Add**.
+
+3. Select:
+
+```text
+By Topic
+```
+
+4. Select:
+
+```text
+/scan
+```
+
+5. Add:
+
+```text
+LaserScan
+```
+
+The LiDAR scan should now be visible.
+
+---
+
+# Part I – Install Mapping and Localization Packages
+
+## Step 20: Install Required Packages
+
+```bash
+sudo apt update
+
+sudo apt install ros-jazzy-slam-toolbox
+
+sudo apt install ros-jazzy-navigation2
+
+sudo apt install ros-jazzy-nav2-bringup
+
+sudo apt install ros-jazzy-teleop-twist-keyboard
+```
+
+---
+
+# Part J – Mapping Using SLAM Toolbox
+
+> **Note:** Mapping requires the robot to move through the environment and provide appropriate odometry and TF information.
+
+## Step 21: Start SLAM Toolbox
+
+Open another terminal:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
+source ~/lidar_bot_ws/install/setup.bash
 ```
 
 Run:
@@ -445,181 +944,13 @@ Run:
 ros2 launch slam_toolbox online_async_launch.py use_sim_time:=true
 ```
 
-SLAM Toolbox processes `/scan` data and publishes an occupancy grid map. It also uses the robot's transform information to construct the map.
-
 ---
 
-## Step 13: Visualize the Map
+## Step 22: Visualize the Map
 
-In RViz2:
-
-1. Set the **Fixed Frame** to:
-
-```text
-map
-```
-
-2. Click **Add**.
-3. Select **By Topic**.
-4. Add the `/map` topic.
-
-The occupancy grid map should appear.
-
----
-
-# Part F – Move the Robot and Create the Map
-
-## Step 14: Start Keyboard Teleoperation
-
-Open a new terminal:
+Open RViz2:
 
 ```bash
-source /opt/ros/jazzy/setup.bash
-```
-
-Run:
-
-```bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
-```
-
-Use the keyboard to move the robot.
-
-Common controls:
-
-```text
-        u    i    o
-        j    k    l
-        m    ,    .
-```
-
-Move the robot around the environment slowly so that the LiDAR sensor can scan walls and obstacles.
-
-The map will gradually be generated.
-
----
-
-## Step 15: Verify the Map
-
-Check whether the `/map` topic is active:
-
-```bash
-ros2 topic list | grep map
-```
-
-You can also inspect the map:
-
-```bash
-ros2 topic echo /map --once
-```
-
----
-
-# Part G – Save the Map
-
-## Step 16: Create a Maps Directory
-
-```bash
-mkdir -p ~/ros2_ws/maps
-```
-
----
-
-## Step 17: Save the Generated Map
-
-Run:
-
-```bash
-ros2 run nav2_map_server map_saver_cli -f ~/ros2_ws/maps/lab_map
-```
-
-This command saves the map as:
-
-```text
-lab_map.pgm
-lab_map.yaml
-```
-
-The Nav2 map saver creates an occupancy-grid map that can be used later for localization.
-
-Check the files:
-
-```bash
-ls ~/ros2_ws/maps
-```
-
-Expected output:
-
-```text
-lab_map.pgm
-lab_map.yaml
-```
-
----
-
-# Part H – Stop the Mapping System
-
-After saving the map, stop:
-
-- SLAM Toolbox
-- Teleoperation
-
-Press:
-
-```text
-Ctrl + C
-```
-
-The Gazebo simulation may remain running.
-
-For a clean localization test, stop all ROS processes and restart the simulation.
-
----
-
-# Part I – Localization Using AMCL
-
-## Step 18: Restart TurtleBot3 Simulation
-
-Open a new terminal:
-
-```bash
-source /opt/ros/jazzy/setup.bash
-```
-
-Run:
-
-```bash
-ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
-```
-
----
-
-## Step 19: Launch Nav2 Localization
-
-Open another terminal:
-
-```bash
-source /opt/ros/jazzy/setup.bash
-```
-
-Run:
-
-```bash
-ros2 launch nav2_bringup localization_launch.py \
-use_sim_time:=true \
-map:=$HOME/ros2_ws/maps/lab_map.yaml
-```
-
-This starts the map server and AMCL localization system.
-
----
-
-## Step 20: Start RViz2
-
-Open another terminal:
-
-```bash
-source /opt/ros/jazzy/setup.bash
 rviz2
 ```
 
@@ -629,15 +960,103 @@ Set:
 Fixed Frame = map
 ```
 
-Add the following displays:
+Add:
 
-- Map
-- RobotModel
-- LaserScan
-- TF
-- PoseWithCovarianceStamped
+```text
+/map
+```
 
-Use:
+Move the robot through the environment.
+
+The map should gradually be generated.
+
+---
+
+# Part K – Save the Map
+
+## Step 23: Create the Map Directory
+
+```bash
+mkdir -p ~/lidar_bot_ws/src/my_robot_description/maps
+```
+
+---
+
+## Step 24: Save the Map
+
+```bash
+ros2 run nav2_map_server map_saver_cli \
+-f ~/lidar_bot_ws/src/my_robot_description/maps/lab_map
+```
+
+The following files will be generated:
+
+```text
+lab_map.yaml
+lab_map.pgm
+```
+
+---
+
+# Part L – Localization Using AMCL
+
+> **Important:** AMCL requires:
+>
+> - A known map
+> - LiDAR data
+> - Robot odometry
+> - A valid TF relationship between `odom` and `base_link`
+
+## Step 25: Stop SLAM
+
+Press:
+
+```text
+Ctrl + C
+```
+
+Stop the mapping process after the map has been saved.
+
+---
+
+## Step 26: Restart the Simulation
+
+```bash
+ros2 launch my_robot_description sim.launch.py
+```
+
+---
+
+## Step 27: Start AMCL and Map Server
+
+```bash
+ros2 launch nav2_bringup localization_launch.py \
+use_sim_time:=true \
+map:=$HOME/lidar_bot_ws/src/my_robot_description/maps/lab_map.yaml
+```
+
+This starts:
+
+- Map Server
+- AMCL Localization
+
+---
+
+# Part M – Set the Initial Pose
+
+## Step 28: Start RViz2
+
+```bash
+rviz2
+```
+
+Set:
+
+```text
+Fixed Frame = map
+```
+
+Add:
 
 ```text
 /map
@@ -645,55 +1064,27 @@ Use:
 /amcl_pose
 ```
 
-as appropriate.
-
 ---
 
-# Part J – Set the Initial Robot Position
-
-## Step 21: Provide Initial Pose
+## Step 29: Set Initial Pose
 
 In RViz2:
 
-1. Click **2D Pose Estimate**.
-2. Click on the approximate robot location on the map.
-3. Drag the arrow in the direction that the robot is facing.
+1. Select **2D Pose Estimate**.
+2. Click on the approximate location of the robot.
+3. Drag the arrow in the direction in which the robot is facing.
 
-The initial pose is published to:
+This publishes an initial pose to:
 
 ```text
 /initialpose
 ```
 
-AMCL will use this information to begin localization.
-
 ---
 
-# Part K – Test Localization
+# Part N – Monitor Localization
 
-## Step 22: Move the Robot
-
-Open another terminal:
-
-```bash
-source /opt/ros/jazzy/setup.bash
-```
-
-Run:
-
-```bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
-```
-
-Move the robot around the environment.
-
-Observe RViz2.
-
-The estimated robot pose should update continuously.
-
----
-
-## Step 23: View the Estimated Pose
+## Step 30: Check the Estimated Pose
 
 Run:
 
@@ -701,28 +1092,30 @@ Run:
 ros2 topic echo /amcl_pose
 ```
 
-Example output:
+Example:
 
 ```text
 pose:
   pose:
+
     position:
+
       x: 1.25
       y: 0.80
-      z: 0.0
 
-orientation:
-  z: 0.32
-  w: 0.94
+    orientation:
+
+      z: 0.32
+      w: 0.94
 ```
 
-The values of `x`, `y`, and orientation represent the estimated pose of the robot.
+The values represent the estimated position and orientation of the robot.
 
 ---
 
-# Part L – Verify Coordinate Frames
+# Part O – Verify the TF Tree
 
-## Step 24: Generate the TF Tree
+## Step 31: Generate the TF Frame Diagram
 
 Run:
 
@@ -738,7 +1131,7 @@ frames.pdf
 
 will be generated.
 
-The coordinate frame relationship should be similar to:
+The expected frame relationship is:
 
 ```text
 map
@@ -750,60 +1143,40 @@ odom
 base_link
  │
  ▼
-base_scan
-```
-
-The `map → odom → base_link` transform chain is important for localization and navigation.
-
----
-
-# Part M – Monitor Important Topics
-
-## Check LiDAR Data
-
-```bash
-ros2 topic echo /scan
+laser_link
 ```
 
 ---
 
-## Check Robot Odometry
+# Important Note About the Current Robot Model
 
-```bash
-ros2 topic echo /odom
+The basic custom robot model used in this experiment provides:
+
+- `base_link`
+- `laser_link`
+- Simulated LiDAR
+- `/scan` topic
+
+For complete SLAM and AMCL localization, the robot must additionally provide:
+
+```text
+Differential Drive
+        │
+        ▼
+Wheel Motion
+        │
+        ▼
+Odometry
+       /odom
+        │
+        ▼
+TF Transform
+odom → base_link
 ```
 
----
+Therefore, before performing full autonomous mapping and localization, the custom robot must be extended with wheels, a differential-drive controller or simulation plugin, and odometry generation.
 
-## Check Map
-
-```bash
-ros2 topic echo /map --once
-```
-
----
-
-## Check AMCL Pose
-
-```bash
-ros2 topic echo /amcl_pose
-```
-
----
-
-# Useful ROS 2 Commands
-
-| Command | Description |
-|---|---|
-| `ros2 topic list` | List available topics |
-| `ros2 node list` | List running nodes |
-| `ros2 service list` | List available services |
-| `ros2 topic echo /scan` | Display LiDAR data |
-| `ros2 topic echo /odom` | Display odometry data |
-| `ros2 topic echo /amcl_pose` | Display estimated pose |
-| `ros2 run tf2_tools view_frames` | Generate TF tree |
-| `ros2 run teleop_twist_keyboard teleop_twist_keyboard` | Control robot using keyboard |
-| `ros2 run nav2_map_server map_saver_cli -f <filename>` | Save occupancy grid map |
+The supplied material also identifies differential drive, wheel encoders, SLAM Toolbox, AMCL, and Nav2 as the next extensions of the current LiDAR robot simulation. 
 
 ---
 
@@ -811,175 +1184,74 @@ ros2 topic echo /amcl_pose
 
 After completing the experiment, students should observe:
 
-1. TurtleBot3 successfully launched in the simulation environment.
-2. LiDAR data available on the `/scan` topic.
-3. LiDAR scans visualized in RViz2.
-4. A map generated using SLAM Toolbox.
-5. The map saved as `.pgm` and `.yaml` files.
-6. The saved map loaded successfully.
-7. AMCL localization started.
-8. The initial pose set using RViz2.
-9. The estimated robot pose updated while the robot moved.
-10. The `/amcl_pose` topic published localization information.
-
----
-
-# Troubleshooting
-
-## ROS 2 Command Not Found
-
-Check:
-
-```bash
-source /opt/ros/jazzy/setup.bash
-```
-
----
-
-## TurtleBot3 Model Not Set
-
-Run:
-
-```bash
-export TURTLEBOT3_MODEL=burger
-```
-
-To make this permanent:
-
-```bash
-echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
-source ~/.bashrc
-```
-
----
-
-## No LiDAR Data
-
-Check:
-
-```bash
-ros2 topic list
-```
-
-Verify that:
-
-```text
-/scan
-```
-
-is available.
-
-Then check:
-
-```bash
-ros2 topic echo /scan
-```
-
----
-
-## AMCL Pose Not Available
-
-Check:
-
-```bash
-ros2 node list
-```
-
-Verify that the AMCL node is running.
-
-Also check:
-
-```bash
-ros2 topic list | grep amcl
-```
-
-Expected:
-
-```text
-/amcl_pose
-```
-
----
-
-## Map Not Loading
-
-Check whether the map files exist:
-
-```bash
-ls ~/ros2_ws/maps
-```
-
-Verify that:
-
-```text
-lab_map.yaml
-lab_map.pgm
-```
-
-are present.
-
-Check the YAML file:
-
-```bash
-cat ~/ros2_ws/maps/lab_map.yaml
-```
-
-Ensure that the image path points to the correct `.pgm` file.
+1. Successful creation of a custom ROS 2 robot package.
+2. Successful creation of the `mini_rover` URDF.
+3. Successful simulation of the robot in Gazebo Harmonic.
+4. LiDAR data published through `/scan`.
+5. LiDAR data visualized in RViz2.
+6. Generation of an occupancy grid map after odometry support is available.
+7. Map saved as `.yaml` and `.pgm` files.
+8. AMCL localization using the saved map.
+9. Estimated robot pose published through `/amcl_pose`.
+10. Robot pose updated as the robot moves.
 
 ---
 
 # Applications
 
-LiDAR-based localization is widely used in:
+LiDAR-based localization is used in:
 
 - Autonomous Mobile Robots
 - Warehouse Robots
-- Industrial Robots
 - Delivery Robots
+- Industrial Robots
 - Service Robots
-- Autonomous Vehicles
 - Agricultural Robots
 - Hospital Robots
 - Search and Rescue Robots
+- Autonomous Navigation Systems
 
 ---
 
 # Result
 
-The mobile robot was successfully localized in a known environment using LiDAR sensor data and the AMCL algorithm. A map of the environment was created using SLAM Toolbox, saved as an occupancy grid map, and later loaded for localization. The robot's estimated position and orientation were visualized in RViz2 and published through the `/amcl_pose` topic.
+The custom mobile robot equipped with a simulated 2D LiDAR sensor was successfully created and simulated using ROS 2 Jazzy and Gazebo Harmonic. LiDAR data was bridged to ROS 2 and visualized using RViz2. The system architecture required for mapping and localization using SLAM Toolbox and AMCL was studied and configured.
+
+After adding robot motion, odometry, and the required TF transformations, the robot can generate a map of the environment and localize itself using LiDAR measurements and the AMCL algorithm.
 
 ---
 
 # Conclusion
 
-This experiment demonstrated the complete workflow of LiDAR-based mobile robot localization in ROS 2 Jazzy. The robot first generated a map of its environment using SLAM Toolbox. The generated map was saved and later used as a known map for localization. AMCL combined LiDAR sensor measurements with odometry information to estimate the position and orientation of the robot. This process forms an important foundation for autonomous mobile robot navigation.
+This experiment demonstrated the basic architecture of a LiDAR-based mobile robot localization system using a custom robot model in ROS 2 Jazzy.
+
+The custom `mini_rover` was equipped with a simulated 2D LiDAR sensor and launched in Gazebo Harmonic. The sensor data was bridged to ROS 2 through the `/scan` topic and visualized in RViz2.
+
+The experiment also introduced the workflow required for robot mapping and localization using SLAM Toolbox and AMCL. Complete localization requires additional support for robot motion, odometry, and the `odom → base_link` transform.
 
 ---
 
 # Viva Questions
 
 1. What is robot localization?
-2. What is the difference between localization and mapping?
-3. What does LiDAR stand for?
-4. Which ROS 2 topic commonly publishes LiDAR data?
-5. What is AMCL?
-6. Why is a known map required for AMCL localization?
-7. What is the purpose of the `/odom` topic?
-8. What information is published on `/amcl_pose`?
-9. What is the purpose of the `map` coordinate frame?
-10. What is the relationship between `map`, `odom`, and `base_link`?
-11. What is an occupancy grid map?
-12. Why is an initial pose required in AMCL?
-13. What is the role of RViz2 in robot localization?
-14. How does LiDAR help a robot determine its position?
-15. What is the difference between SLAM and AMCL?
+2. What is LiDAR?
+3. What does the `/scan` topic contain?
+4. What is the ROS 2 message type used for LiDAR data?
+5. What is the purpose of `laser_link`?
+6. What is the purpose of `base_link`?
+7. What is Gazebo Harmonic?
+8. What is RViz2 used for?
+9. What is AMCL?
+10. What is SLAM?
+11. What is the difference between SLAM and localization?
+12. Why is odometry required for AMCL?
+13. What is the purpose of the `/odom` topic?
+14. What is a TF transform?
+15. Explain the relationship between `map`, `odom`, and `base_link`.
+16. What is an occupancy grid map?
+17. Why is an initial pose required for AMCL?
+18. What is the role of the ROS-Gazebo bridge?
+19. What is the purpose of the `/amcl_pose` topic?
+20. What additional components are required to convert the current LiDAR robot into a fully localizable mobile robot?
 
 ---
-
-# References
-
-- ROS 2 Jazzy Documentation
-- Nav2 Documentation
-- Nav2 AMCL Documentation
-- SLAM Toolbox Documentation
-- TurtleBot3 Documentation
