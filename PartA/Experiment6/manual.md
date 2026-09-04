@@ -6,17 +6,6 @@ To interface an Arduino with a Bluetooth Low Energy (BLE) module and establish w
 
 ---
 
-# Learning Outcomes
-
-After completing this experiment, the student will be able to:
-
-- Understand the fundamentals of Bluetooth Low Energy (BLE).
-- Interface a BLE module with an Arduino board.
-- Establish wireless communication between Arduino and a smartphone.
-- Send and receive data over BLE.
-- Develop simple wireless control applications using Arduino.
-
----
 
 # Apparatus Required
 
