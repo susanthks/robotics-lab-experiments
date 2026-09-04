@@ -6,25 +6,6 @@ To simulate a custom mobile robot equipped with a 2D LiDAR sensor in ROS 2 Jazzy
 
 ---
 
-# Objectives
-
-After completing this experiment, students will be able to:
-
-- Create and simulate a custom mobile robot in ROS 2.
-- Understand the structure of a robot description package.
-- Create a robot model using URDF.
-- Add a simulated 2D LiDAR sensor to the robot.
-- Launch the robot in Gazebo Harmonic.
-- Bridge LiDAR data from Gazebo to ROS 2.
-- Visualize LiDAR data in RViz2.
-- Generate a map using SLAM Toolbox.
-- Save and load an occupancy grid map.
-- Understand robot odometry.
-- Perform localization using AMCL.
-- Visualize the estimated robot pose.
-
----
-
 # Theory
 
 ## Robot Localization
