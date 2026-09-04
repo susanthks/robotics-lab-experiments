@@ -1,8 +1,8 @@
 ```bash
 ros2_ws/
 └── src/
-    └── communication_demo/
-        ├── communication_demo/
+    └── pub_sub_py/
+        ├── pub_sub_py/
         │   ├── __init__.py
         │   ├── publisher.py
         │   ├── subscriber.py
