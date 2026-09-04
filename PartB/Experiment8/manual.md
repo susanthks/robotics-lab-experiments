@@ -8,20 +8,6 @@ To learn the basic communication mechanisms in **ROS 2 Jazzy Jalisco** by creati
 
 ---
 
-# Objectives
-
-After completing this experiment, students will be able to:
-
-- Understand Publisher and Subscriber communication.
-- Create a simple Publisher node using Python.
-- Create a simple Subscriber node using Python.
-- Implement a Service and Client.
-- Record ROS 2 topic messages using **rosbag**.
-- Replay recorded messages.
-- Read information from a ROS bag file.
-- Use ROS 2 command-line tools for monitoring and debugging.
-
----
 
 # Theory
 
