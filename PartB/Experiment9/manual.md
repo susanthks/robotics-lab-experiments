@@ -52,16 +52,8 @@ sensor_msgs/msg/LaserScan
 
 The robot uses the laser scan data to detect surrounding walls and obstacles.
 
-```text
-              Wall
-    ──────────────────────
+<img width="883" height="615" alt="image" src="https://github.com/user-attachments/assets/016c3d98-20b1-413e-b32d-f07be11dedd4" />
 
-         *   *   *
-       *           *
-     *    ROBOT      *
-       *           *
-         *   *   *
-```
 
 ---
 
@@ -81,17 +73,8 @@ It uses:
 
 to estimate the robot's pose.
 
-```text
-                 Known Map
-                     │
-                     ▼
-LiDAR Data ───────► AMCL ◄────── Odometry
-  (/scan)             │             (/odom)
-                      │
-                      ▼
-             Estimated Robot Pose
-                 (/amcl_pose)
-```
+<img width="985" height="675" alt="image" src="https://github.com/user-attachments/assets/d057bb4d-6cc1-42fc-81b8-0c8320fbd5fc" />
+
 
 ---
 
@@ -99,37 +82,8 @@ LiDAR Data ───────► AMCL ◄────── Odometry
 
 The complete workflow of this experiment is:
 
-```text
-             Custom Mobile Robot
-                      │
-          ┌───────────┴───────────┐
-          │                       │
-          ▼                       ▼
-      Odometry                  LiDAR
-      /odom                     /scan
-          │                       │
-          └───────────┬───────────┘
-                      ▼
-                 SLAM Toolbox
-                      │
-                      ▼
-                    /map
-                      │
-                      ▼
-                  Save Map
-                      │
-                      ▼
-                  Known Map
-                      │
-                      ▼
-                     AMCL
-                      │
-                      ▼
-                 /amcl_pose
-                      │
-                      ▼
-                     RViz2
-```
+<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/0f2111a4-6802-4528-b760-a330ef01f888" />
+
 
 ---
 
