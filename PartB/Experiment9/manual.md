@@ -1,1229 +1,489 @@
-# Experiment 9: Localization of a Mobile Robot Using LiDAR
+# Experiment 9: Interfacing RPLiDAR with ROS 2 and RViz2
 
-## Aim
-
-To simulate a custom mobile robot equipped with a 2D LiDAR sensor in ROS 2 Jazzy and perform robot localization using LiDAR data, odometry, a known map, and the AMCL localization algorithm.
+**Topics:** RPLiDAR • ROS 2 • LaserScan • `/scan` Topic • TF Frame • RViz2 • 2D LiDAR Visualization
 
 ---
 
-# Theory
+## 1. Aim
 
-## Robot Localization
+To interface an RPLiDAR sensor with ROS 2 and visualize the real-time 2D laser scan data using RViz2.
 
-Robot localization is the process of determining the position and orientation of a robot within an environment.
+---
 
-In simple terms, localization answers the question:
+## 2. Objectives
 
-> **Where is the robot?**
+After completing this experiment, students should be able to:
 
-The pose of a mobile robot in a two-dimensional environment is represented as:
+1. Explain the basic working principle of 2D LiDAR.
+2. Identify the major components and interfaces of an RPLiDAR.
+3. Connect an RPLiDAR to a computer through USB.
+4. Install and configure the RPLiDAR ROS 2 driver.
+5. Run the RPLiDAR node in ROS 2.
+6. Understand the `/scan` topic and `sensor_msgs/msg/LaserScan` message.
+7. Configure RViz2 to display LiDAR data.
+8. Observe the surrounding environment using a 2D laser scan.
+9. Identify common RPLiDAR and ROS 2 connection problems.
+
+---
+
+## 3. Introduction
+
+### 3.1 What is LiDAR?
+
+**LiDAR** stands for **Light Detection and Ranging**.
+
+A LiDAR sensor measures the distance between the sensor and surrounding objects using laser light.
+
+The basic principle is:
 
 ```text
-(x, y, θ)
+Laser Pulse
+     |
+     v
+Object / Obstacle
+     |
+     v
+Reflected Laser
+     |
+     v
+LiDAR Receiver
+     |
+     v
+Distance Measurement
 ```
 
-Where:
+A 2D LiDAR rotates its laser beam around the sensor and measures distances at different angles.
 
-- `x` is the position along the X-axis.
-- `y` is the position along the Y-axis.
-- `θ` is the orientation of the robot.
-
----
-
-# LiDAR
-
-LiDAR stands for **Light Detection and Ranging**.
-
-A LiDAR sensor measures the distance between the robot and surrounding objects.
-
-In this experiment, the custom robot uses a simulated 2D LiDAR sensor.
-
-The sensor publishes data through:
+The resulting measurements can be represented as:
 
 ```text
-/scan
+             0°
+              |
+              |
+       90° ---+--- -90°
+              |
+              |
+             180°
 ```
 
-The ROS 2 message type is:
+The collection of distance measurements forms a **2D laser scan**.
+
+---
+
+## 4. RPLiDAR
+
+RPLiDAR is a family of 2D/3D LiDAR sensors developed by **SLAMTEC**.
+
+Common models include:
+
+- RPLiDAR A1
+- RPLiDAR A2
+- RPLiDAR A3
+- RPLiDAR C1
+- RPLiDAR S1
+- RPLiDAR S2
+- RPLiDAR S3
+
+For this experiment, an **RPLiDAR A1/A2-type serial model** can be used.
+
+> **Note:** Different RPLiDAR models may require different serial baud rates and launch files. Always use the launch file and parameters appropriate for the installed model.
+
+---
+
+## 5. ROS 2 and RPLiDAR
+
+ROS 2 provides the software communication framework between the RPLiDAR and visualization tools.
+
+The basic data flow is:
 
 ```text
-sensor_msgs/msg/LaserScan
+             RPLiDAR
+                |
+                | USB / Serial
+                v
+        +----------------+
+        | RPLiDAR Driver |
+        +----------------+
+                |
+                | /scan
+                v
+        +----------------+
+        |     ROS 2      |
+        |     Topic      |
+        +----------------+
+                |
+                v
+              RViz2
+                |
+                v
+       2D Laser Visualization
 ```
 
-The robot uses the laser scan data to detect surrounding walls and obstacles.
-
-<img width="883" height="615" alt="image" src="https://github.com/user-attachments/assets/016c3d98-20b1-413e-b32d-f07be11dedd4" />
-
+The RPLiDAR ROS 2 driver publishes scan data on the `/scan` topic using the standard ROS 2 `sensor_msgs/msg/LaserScan` message type.
 
 ---
 
-# AMCL
+## 6. Requirements
 
-AMCL stands for:
+### Hardware
 
-**Adaptive Monte Carlo Localization**
+- Computer/Laptop
+- Ubuntu Linux
+- RPLiDAR sensor
+- USB cable / USB-to-serial interface
+- Suitable RPLiDAR power supply/interface
+- Test objects or obstacles
 
-AMCL is a probabilistic localization algorithm based on a particle filter.
+### Software
 
-It uses:
-
-- A known map
-- LiDAR sensor data
-- Robot odometry
-
-to estimate the robot's pose.
-
-<img width="985" height="675" alt="image" src="https://github.com/user-attachments/assets/d057bb4d-6cc1-42fc-81b8-0c8320fbd5fc" />
-
-
----
-
-# ROS 2 Localization Workflow
-
-The complete workflow of this experiment is:
-
-<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/0f2111a4-6802-4528-b760-a330ef01f888" />
-
-
----
-
-# Important ROS 2 Topics
-
-| Topic | Description |
-|---|---|
-| `/scan` | LiDAR sensor data |
-| `/odom` | Robot odometry |
-| `/map` | Occupancy grid map |
-| `/tf` | Coordinate transformations |
-| `/tf_static` | Static transformations |
-| `/cmd_vel` | Velocity command |
-| `/amcl_pose` | Estimated robot pose |
-| `/initialpose` | Initial pose for AMCL |
-
----
-
-# Coordinate Frames
-
-The robot coordinate frames used in this experiment are:
-
-```text
-map
- │
- ▼
-odom
- │
- ▼
-base_link
- │
- ▼
-laser_link
-```
-
-Where:
-
-- `map` represents the global environment.
-- `odom` represents the odometry reference frame.
-- `base_link` represents the main body of the robot.
-- `laser_link` represents the LiDAR sensor frame.
-
----
-
-# Requirements
-
-- Ubuntu 24.04 LTS
-- ROS 2 Jazzy Jalisco
-- Gazebo Harmonic
+- ROS 2 Jazzy
 - RViz2
-- ROS-Gazebo Bridge
-- SLAM Toolbox
-- Navigation2
-- AMCL
-- Python 3
+- Git
+- `colcon`
+- RPLiDAR ROS 2 driver
 
 ---
 
-# Part A – Create the Workspace
+## 7. Prerequisites
 
-## Step 1: Open Terminal
+Before starting this experiment, make sure ROS 2 Jazzy is installed.
 
-Open a terminal using:
+Test ROS 2:
 
-```text
-Ctrl + Alt + T
+```bash
+source /opt/ros/jazzy/setup.bash
+ros2 --version
 ```
 
+Check RViz2:
+
+```bash
+rviz2
+```
+
+Close RViz2 after confirming that it starts successfully.
+
 ---
 
-## Step 2: Source ROS 2 Jazzy
+## 8. RPLiDAR Hardware Connection
+
+Connect the RPLiDAR to the computer using the supplied USB interface.
+
+Typical connection:
+
+```text
+RPLiDAR
+   |
+   | USB
+   v
+Computer
+```
+
+After connecting the device, check the available serial devices:
+
+```bash
+ls /dev/ttyUSB*
+```
+
+or:
+
+```bash
+ls /dev/ttyACM*
+```
+
+A typical RPLiDAR connection may appear as:
+
+```text
+/dev/ttyUSB0
+```
+
+> **Note:** The device name may be different on your computer. Do not assume that it is always `/dev/ttyUSB0`.
+
+---
+
+## 9. Check USB Device
+
+Use:
+
+```bash
+lsusb
+```
+
+You can also check recent kernel messages:
+
+```bash
+dmesg | tail
+```
+
+If the RPLiDAR USB interface is detected, a serial device should normally appear.
+
+Check:
+
+```bash
+ls -l /dev/ttyUSB0
+```
+
+If your system uses another device name, replace `/dev/ttyUSB0` in all commands with the actual device path.
+
+---
+
+## 10. Install Required ROS 2 Packages
+
+Make sure the ROS 2 environment is sourced:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
 ```
+
+Install common ROS 2 tools:
+
+```bash
+sudo apt update
+sudo apt install git python3-colcon-common-extensions ros-jazzy-rviz2
+```
+
+---
+
+## 11. Create a ROS 2 Workspace
+
+Create a workspace for the RPLiDAR driver:
+
+```bash
+mkdir -p ~/rplidar_ws/src
+cd ~/rplidar_ws/src
+```
+
+Clone the official SLAMTEC ROS 2 driver:
+
+```bash
+git clone https://github.com/Slamtec/sllidar_ros2.git
+```
+
+Return to the workspace:
+
+```bash
+cd ~/rplidar_ws
+```
+
+Source ROS 2:
+
+```bash
+source /opt/ros/jazzy/setup.bash
+```
+
+Build the package:
+
+```bash
+colcon build --symlink-install
+```
+
+After a successful build:
+
+```bash
+source ~/rplidar_ws/install/setup.bash
+```
+
+Verify that the package is available:
+
+```bash
+ros2 pkg list | grep sllidar
+```
+
+Expected output should include:
+
+```text
+sllidar_ros2
+```
+
+---
+
+## 12. Set Serial Port Permissions
+
+The RPLiDAR driver needs permission to access the serial device.
+
+First identify the device:
+
+```bash
+ls /dev/ttyUSB*
+```
+
+For a temporary permission test:
+
+```bash
+sudo chmod 777 /dev/ttyUSB0
+```
+
+> **Note:** This is suitable for testing but is not the preferred permanent solution. A udev rule is recommended for a permanent setup.
+
+If your device is `/dev/ttyUSB1`, use:
+
+```bash
+sudo chmod 777 /dev/ttyUSB1
+```
+
+---
+
+## 13. Permanent Environment Setup
 
 To automatically source ROS 2:
 
 ```bash
 echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+```
+
+To automatically source the RPLiDAR workspace:
+
+```bash
+echo "source ~/rplidar_ws/install/setup.bash" >> ~/.bashrc
+```
+
+Reload the terminal configuration:
+
+```bash
 source ~/.bashrc
 ```
 
----
-
-## Step 3: Create a Workspace
+Verify:
 
 ```bash
-mkdir -p ~/lidar_bot_ws/src
-cd ~/lidar_bot_ws
+ros2 pkg list | grep sllidar
 ```
 
 ---
 
-## Step 4: Create the Robot Description Package
+## 14. RPLiDAR Launch
+
+For an RPLiDAR A1, the official `sllidar_ros2` package provides:
 
 ```bash
-cd ~/lidar_bot_ws/src
-
-ros2 pkg create my_robot_description \
---build-type ament_python
+ros2 launch sllidar_ros2 view_sllidar_a1_launch.py
 ```
 
-Create the required directories:
+This launch file starts the RPLiDAR driver and RViz visualization.
+
+For other models, use the corresponding launch file provided by the package.
+
+Examples:
 
 ```bash
-cd ~/lidar_bot_ws/src/my_robot_description
-
-mkdir launch
-mkdir urdf
-mkdir worlds
-mkdir rviz
-mkdir config
-mkdir maps
+ros2 launch sllidar_ros2 view_sllidar_a2m7_launch.py
 ```
 
-The package structure should be:
+```bash
+ros2 launch sllidar_ros2 view_sllidar_a3_launch.py
+```
+
+```bash
+ros2 launch sllidar_ros2 view_sllidar_c1_launch.py
+```
+
+```bash
+ros2 launch sllidar_ros2 view_sllidar_s1_launch.py
+```
+
+> **Important:** Use the launch file corresponding to your actual RPLiDAR model.
+
+---
+
+## 15. Launch RPLiDAR with Custom Serial Port
+
+If the RPLiDAR is connected to `/dev/ttyUSB0`, the A1 launch can be started using:
+
+```bash
+ros2 launch sllidar_ros2 sllidar_a1_launch.py \
+serial_port:=/dev/ttyUSB0
+```
+
+The A1 driver commonly uses:
 
 ```text
-my_robot_description/
-├── config/
-├── launch/
-├── maps/
-├── my_robot_description/
-│   └── __init__.py
-├── resource/
-│   └── my_robot_description
-├── rviz/
-├── urdf/
-├── worlds/
-├── package.xml
-├── setup.cfg
-└── setup.py
+Serial Port   : /dev/ttyUSB0
+Baud Rate     : 115200
+Frame ID      : laser
 ```
+
+If your RPLiDAR model requires different parameters, use the model-specific launch file.
 
 ---
 
-# Part B – Configure the Package
+## 16. Check ROS 2 Nodes
 
-## Step 5: Update `package.xml`
+Open a new terminal.
 
-Open:
+Source the environments:
 
 ```bash
-nano package.xml
-```
-
-Add the following dependencies before the closing `</package>` tag:
-
-```xml
-<exec_depend>robot_state_publisher</exec_depend>
-<exec_depend>rviz2</exec_depend>
-<exec_depend>ros_gz_sim</exec_depend>
-<exec_depend>ros_gz_bridge</exec_depend>
-<exec_depend>tf2_ros</exec_depend>
-```
-
-Save using:
-
-```text
-Ctrl + O
-```
-
-Press:
-
-```text
-Enter
-```
-
-Exit using:
-
-```text
-Ctrl + X
-```
-
----
-
-## Step 6: Configure `setup.py`
-
-Replace the contents of `setup.py` with:
-
-```python
-from setuptools import find_packages, setup
-from glob import glob
-import os
-
-package_name = 'my_robot_description'
-
-setup(
-    name=package_name,
-    version='0.0.0',
-    packages=find_packages(exclude=['test']),
-    data_files=[
-        (
-            'share/ament_index/resource_index/packages',
-            ['resource/' + package_name]
-        ),
-        (
-            'share/' + package_name,
-            ['package.xml']
-        ),
-        (
-            os.path.join('share', package_name, 'launch'),
-            glob('launch/*.py')
-        ),
-        (
-            os.path.join('share', package_name, 'urdf'),
-            glob('urdf/*')
-        ),
-        (
-            os.path.join('share', package_name, 'worlds'),
-            glob('worlds/*')
-        ),
-        (
-            os.path.join('share', package_name, 'rviz'),
-            glob('rviz/*')
-        ),
-        (
-            os.path.join('share', package_name, 'maps'),
-            glob('maps/*')
-        ),
-        (
-            os.path.join('share', package_name, 'config'),
-            glob('config/*')
-        ),
-    ],
-    install_requires=['setuptools'],
-    zip_safe=True,
-    maintainer='student',
-    maintainer_email='student@example.com',
-    description='Custom mobile robot with LiDAR for ROS 2 localization',
-    license='Apache-2.0',
-    tests_require=['pytest'],
-    entry_points={
-        'console_scripts': [],
-    },
-)
-```
-
----
-
-## Step 7: Verify `setup.cfg`
-
-Ensure that `setup.cfg` contains:
-
-```ini
-[develop]
-script_dir=$base/lib/my_robot_description
-
-[install]
-install_scripts=$base/lib/my_robot_description
-```
-
----
-
-# Part C – Create the Custom Robot
-
-## Step 8: Create the Robot URDF
-
-Create:
-
-```bash
-nano urdf/robot.urdf
-```
-
-Add the following robot description:
-
-```xml
-<?xml version="1.0"?>
-
-<robot name="mini_rover">
-
-  <!-- Robot Base -->
-
-  <link name="base_link">
-
-    <visual>
-      <geometry>
-        <box size="0.3 0.2 0.1"/>
-      </geometry>
-
-      <material name="blue">
-        <color rgba="0.2 0.4 0.8 1.0"/>
-      </material>
-    </visual>
-
-    <collision>
-      <geometry>
-        <box size="0.3 0.2 0.1"/>
-      </geometry>
-    </collision>
-
-    <inertial>
-      <mass value="2.0"/>
-
-      <origin xyz="0 0 0"/>
-
-      <inertia
-        ixx="0.02"
-        ixy="0.0"
-        ixz="0.0"
-        iyy="0.02"
-        iyz="0.0"
-        izz="0.02"/>
-    </inertial>
-
-  </link>
-
-  <!-- LiDAR Sensor -->
-
-  <link name="laser_link">
-
-    <visual>
-      <geometry>
-        <cylinder radius="0.03" length="0.05"/>
-      </geometry>
-
-      <material name="black">
-        <color rgba="0.1 0.1 0.1 1.0"/>
-      </material>
-
-    </visual>
-
-  </link>
-
-  <!-- LiDAR Joint -->
-
-  <joint name="laser_joint" type="fixed">
-
-    <parent link="base_link"/>
-
-    <child link="laser_link"/>
-
-    <origin xyz="0.1 0 0.08" rpy="0 0 0"/>
-
-  </joint>
-
-  <!-- Gazebo LiDAR -->
-
-  <gazebo reference="laser_link">
-
-    <sensor name="lidar" type="gpu_lidar">
-
-      <update_rate>10</update_rate>
-
-      <topic>scan</topic>
-
-      <gz_frame_id>laser_link</gz_frame_id>
-
-      <ray>
-
-        <scan>
-
-          <horizontal>
-
-            <samples>360</samples>
-
-            <resolution>1</resolution>
-
-            <min_angle>-3.14159</min_angle>
-
-            <max_angle>3.14159</max_angle>
-
-          </horizontal>
-
-        </scan>
-
-        <range>
-
-          <min>0.12</min>
-
-          <max>8.0</max>
-
-        </range>
-
-      </ray>
-
-    </sensor>
-
-  </gazebo>
-
-</robot>
-```
-
-The custom robot model contains a `base_link`, fixed `laser_link`, and a Gazebo GPU LiDAR sensor configured with 360 samples and a scan range of 0.12 m to 8.0 m. :contentReference[oaicite:1]{index=1}
-
----
-
-## Step 9: Verify the URDF
-
-Run:
-
-```bash
-check_urdf urdf/robot.urdf
-```
-
-Expected output:
-
-```text
-Successfully Parsed XML
-```
-
----
-
-# Part D – Create the Gazebo World
-
-## Step 10: Create the World File
-
-Create:
-
-```bash
-nano worlds/localization_world.sdf
-```
-
-Add:
-
-```xml
-
-<?xml version="1.0"?>
-
-<robot name="mini_rover">
-
-  <!-- ============================================================ -->
-  <!-- BASE LINK -->
-  <!-- ============================================================ -->
-
-  <link name="base_link">
-
-    <visual>
-      <geometry>
-        <box size="0.40 0.30 0.10"/>
-      </geometry>
-
-      <material name="blue">
-        <color rgba="0.2 0.4 0.8 1.0"/>
-      </material>
-    </visual>
-
-    <collision>
-      <geometry>
-        <box size="0.40 0.30 0.10"/>
-      </geometry>
-    </collision>
-
-    <inertial>
-      <origin xyz="0 0 0"/>
-      <mass value="5.0"/>
-
-      <inertia
-        ixx="0.05"
-        ixy="0.0"
-        ixz="0.0"
-        iyy="0.05"
-        iyz="0.0"
-        izz="0.10"/>
-    </inertial>
-
-  </link>
-
-
-  <!-- ============================================================ -->
-  <!-- FRONT LEFT WHEEL -->
-  <!-- ============================================================ -->
-
-  <link name="front_left_wheel">
-
-    <visual>
-      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
-
-      <geometry>
-        <cylinder radius="0.05" length="0.03"/>
-      </geometry>
-
-      <material name="black">
-        <color rgba="0.1 0.1 0.1 1.0"/>
-      </material>
-    </visual>
-
-    <collision>
-      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
-
-      <geometry>
-        <cylinder radius="0.05" length="0.03"/>
-      </geometry>
-    </collision>
-
-    <inertial>
-      <mass value="0.2"/>
-
-      <inertia
-        ixx="0.0002"
-        ixy="0.0"
-        ixz="0.0"
-        iyy="0.0002"
-        iyz="0.0"
-        izz="0.0002"/>
-    </inertial>
-
-  </link>
-
-
-  <!-- ============================================================ -->
-  <!-- FRONT RIGHT WHEEL -->
-  <!-- ============================================================ -->
-
-  <link name="front_right_wheel">
-
-    <visual>
-      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
-
-      <geometry>
-        <cylinder radius="0.05" length="0.03"/>
-      </geometry>
-
-      <material name="black">
-        <color rgba="0.1 0.1 0.1 1.0"/>
-      </material>
-    </visual>
-
-    <collision>
-      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
-
-      <geometry>
-        <cylinder radius="0.05" length="0.03"/>
-      </geometry>
-    </collision>
-
-    <inertial>
-      <mass value="0.2"/>
-
-      <inertia
-        ixx="0.0002"
-        ixy="0.0"
-        ixz="0.0"
-        iyy="0.0002"
-        iyz="0.0"
-        izz="0.0002"/>
-    </inertial>
-
-  </link>
-
-
-  <!-- ============================================================ -->
-  <!-- REAR LEFT WHEEL -->
-  <!-- ============================================================ -->
-
-  <link name="rear_left_wheel">
-
-    <visual>
-      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
-
-      <geometry>
-        <cylinder radius="0.05" length="0.03"/>
-      </geometry>
-
-      <material name="black">
-        <color rgba="0.1 0.1 0.1 1.0"/>
-      </material>
-    </visual>
-
-    <collision>
-      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
-
-      <geometry>
-        <cylinder radius="0.05" length="0.03"/>
-      </geometry>
-    </collision>
-
-    <inertial>
-      <mass value="0.2"/>
-
-      <inertia
-        ixx="0.0002"
-        ixy="0.0"
-        ixz="0.0"
-        iyy="0.0002"
-        iyz="0.0"
-        izz="0.0002"/>
-    </inertial>
-
-  </link>
-
-
-  <!-- ============================================================ -->
-  <!-- REAR RIGHT WHEEL -->
-  <!-- ============================================================ -->
-
-  <link name="rear_right_wheel">
-
-    <visual>
-      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
-
-      <geometry>
-        <cylinder radius="0.05" length="0.03"/>
-      </geometry>
-
-      <material name="black">
-        <color rgba="0.1 0.1 0.1 1.0"/>
-      </material>
-    </visual>
-
-    <collision>
-      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
-
-      <geometry>
-        <cylinder radius="0.05" length="0.03"/>
-      </geometry>
-    </collision>
-
-    <inertial>
-      <mass value="0.2"/>
-
-      <inertia
-        ixx="0.0002"
-        ixy="0.0"
-        ixz="0.0"
-        iyy="0.0002"
-        iyz="0.0"
-        izz="0.0002"/>
-    </inertial>
-
-  </link>
-
-
-  <!-- ============================================================ -->
-  <!-- LiDAR -->
-  <!-- ============================================================ -->
-
-  <link name="laser_link">
-
-    <visual>
-      <geometry>
-        <cylinder radius="0.04" length="0.05"/>
-      </geometry>
-
-      <material name="lidar_black">
-        <color rgba="0.05 0.05 0.05 1.0"/>
-      </material>
-    </visual>
-
-    <collision>
-      <geometry>
-        <cylinder radius="0.04" length="0.05"/>
-      </geometry>
-    </collision>
-
-    <inertial>
-      <mass value="0.10"/>
-
-      <inertia
-        ixx="0.0001"
-        ixy="0.0"
-        ixz="0.0"
-        iyy="0.0001"
-        iyz="0.0"
-        izz="0.0001"/>
-    </inertial>
-
-  </link>
-
-
-  <!-- ============================================================ -->
-  <!-- WHEEL JOINTS -->
-  <!-- ============================================================ -->
-
-  <joint name="front_left_joint" type="continuous">
-
-    <parent link="base_link"/>
-    <child link="front_left_wheel"/>
-
-    <origin xyz="0.12 0.16 -0.05"/>
-
-    <axis xyz="0 1 0"/>
-
-  </joint>
-
-
-  <joint name="front_right_joint" type="continuous">
-
-    <parent link="base_link"/>
-    <child link="front_right_wheel"/>
-
-    <origin xyz="0.12 -0.16 -0.05"/>
-
-    <axis xyz="0 1 0"/>
-
-  </joint>
-
-
-  <joint name="rear_left_joint" type="continuous">
-
-    <parent link="base_link"/>
-    <child link="rear_left_wheel"/>
-
-    <origin xyz="-0.12 0.16 -0.05"/>
-
-    <axis xyz="0 1 0"/>
-
-  </joint>
-
-
-  <joint name="rear_right_joint" type="continuous">
-
-    <parent link="base_link"/>
-    <child link="rear_right_wheel"/>
-
-    <origin xyz="-0.12 -0.16 -0.05"/>
-
-    <axis xyz="0 1 0"/>
-
-  </joint>
-
-
-  <!-- ============================================================ -->
-  <!-- LiDAR JOINT -->
-  <!-- ============================================================ -->
-
-  <joint name="laser_joint" type="fixed">
-
-    <parent link="base_link"/>
-
-    <child link="laser_link"/>
-
-    <!-- LiDAR mounted on top of robot -->
-
-    <origin xyz="0 0 0.10" rpy="0 0 0"/>
-
-  </joint>
-
-
-  <!-- ============================================================ -->
-  <!-- GAZEBO DIFFERENTIAL DRIVE -->
-  <!-- ============================================================ -->
-
-  <gazebo>
-
-    <plugin
-      filename="gz-sim-diff-drive-system"
-      name="gz::sim::systems::DiffDrive">
-
-      <left_joint>front_left_joint</left_joint>
-      <left_joint>rear_left_joint</left_joint>
-
-      <right_joint>front_right_joint</right_joint>
-      <right_joint>rear_right_joint</right_joint>
-
-      <wheel_separation>0.32</wheel_separation>
-
-      <wheel_radius>0.05</wheel_radius>
-
-      <topic>cmd_vel</topic>
-
-      <odom_topic>odom</odom_topic>
-
-      <frame_id>odom</frame_id>
-
-      <child_frame_id>base_link</child_frame_id>
-
-    </plugin>
-
-  </gazebo>
-
-
-  <!-- ============================================================ -->
-  <!-- GAZEBO 2D LiDAR SENSOR -->
-  <!-- ============================================================ -->
-
-  <gazebo reference="laser_link">
-
-    <sensor name="lidar" type="gpu_lidar">
-
-      <always_on>true</always_on>
-
-      <update_rate>10</update_rate>
-
-      <topic>scan</topic>
-
-      <gz_frame_id>laser_link</gz_frame_id>
-
-      <ray>
-
-        <scan>
-
-          <horizontal>
-
-            <samples>360</samples>
-
-            <resolution>1</resolution>
-
-            <min_angle>-3.14159</min_angle>
-
-            <max_angle>3.14159</max_angle>
-
-          </horizontal>
-
-        </scan>
-
-        <range>
-
-          <min>0.12</min>
-
-          <max>8.0</max>
-
-          <resolution>0.01</resolution>
-
-        </range>
-
-      </ray>
-
-    </sensor>
-
-  </gazebo>
-
-
-</robot>
-
-</sdf>
-```
-
-The obstacles provide surfaces that generate LiDAR returns. The provided robot simulation material uses a static box obstacle specifically for this purpose. :contentReference[oaicite:2]{index=2}
-
----
-
-# Part E – Create the Simulation Launch File
-
-## Step 11: Create `sim.launch.py`
-
-Create:
-
-```bash
-nano launch/sim.launch.py
-```
-
-Add:
-
-```python
-from launch import LaunchDescription
-from launch.actions import ExecuteProcess
-from launch_ros.actions import Node
-from ament_index_python.packages import get_package_share_directory
-
-import os
-
-
-def generate_launch_description():
-
-    pkg_path = get_package_share_directory(
-        'my_robot_description'
-    )
-
-    urdf_file = os.path.join(
-        pkg_path,
-        'urdf',
-        'robot.urdf'
-    )
-
-    world_file = os.path.join(
-        pkg_path,
-        'worlds',
-        'localization_world.sdf'
-    )
-
-    with open(urdf_file, 'r') as file:
-        robot_description = file.read()
-
-    return LaunchDescription([
-
-        ExecuteProcess(
-            cmd=[
-                'gz',
-                'sim',
-                '-r',
-                world_file
-            ],
-            output='screen'
-        ),
-
-        Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            parameters=[{
-                'robot_description': robot_description,
-                'use_sim_time': True
-            }],
-            output='screen'
-        ),
-
-        Node(
-            package='ros_gz_sim',
-            executable='create',
-            arguments=[
-                '-string',
-                robot_description,
-                '-name',
-                'mini_rover'
-            ],
-            output='screen'
-        ),
-
-        Node(
-            package='ros_gz_bridge',
-            executable='parameter_bridge',
-            arguments=[
-                '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-                '/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan'
-            ],
-            output='screen'
-        )
-
-    ])
-```
-
-The supplied launch-file structure starts Gazebo, publishes the robot state, spawns the `mini_rover`, and bridges the clock and LiDAR scan data between Gazebo and ROS 2. :contentReference[oaicite:3]{index=3}
-
----
-
-# Part F – Build and Run the Simulation
-
-## Step 12: Build the Workspace
-
-```bash
-cd ~/lidar_bot_ws
-
-colcon build --symlink-install
-```
-
----
-
-## Step 13: Source the Workspace
-
-```bash
-source install/setup.bash
-```
-
----
-
-## Step 14: Launch the Custom Robot
-
-```bash
-ros2 launch my_robot_description sim.launch.py
-```
-
-Gazebo Harmonic should open and display the custom `mini_rover`.
-
----
-
-# Part G – Verify LiDAR Data
-
-## Step 15: Check Available Topics
-
-Open another terminal:
-
-```bash
-cd ~/lidar_bot_ws
-
 source /opt/ros/jazzy/setup.bash
-source install/setup.bash
+source ~/rplidar_ws/install/setup.bash
 ```
 
-Run:
+Check active nodes:
+
+```bash
+ros2 node list
+```
+
+You should see a node similar to:
+
+```text
+/sllidar_node
+```
+
+---
+
+## 17. Check ROS 2 Topics
+
+List the available topics:
 
 ```bash
 ros2 topic list
 ```
 
-Check for:
+The important topic for this experiment is:
 
 ```text
 /scan
 ```
 
+The `/scan` topic contains the laser scan measurements.
+
 ---
 
-## Step 16: Display LiDAR Messages
+## 18. Check the LaserScan Message
+
+Check the topic type:
 
 ```bash
-ros2 topic echo /scan
+ros2 topic type /scan
 ```
 
-You should observe messages of type:
+Expected output:
 
 ```text
 sensor_msgs/msg/LaserScan
 ```
 
-The `ranges` array contains distance measurements from the LiDAR sensor.
-
----
-
-## Step 17: Check LiDAR Topic Information
+Display the scan data:
 
 ```bash
-ros2 topic info /scan
+ros2 topic echo /scan
 ```
 
----
-
-# Part H – Visualize LiDAR Data in RViz2
-
-## Step 18: Start RViz2
-
-```bash
-rviz2
-```
-
----
-
-## Step 19: Configure RViz2
-
-1. Set **Fixed Frame** to:
+You should see values similar to:
 
 ```text
-base_link
+header:
+  frame_id: laser
+angle_min: ...
+angle_max: ...
+angle_increment: ...
+range_min: ...
+range_max: ...
+ranges:
+- ...
+- ...
+- ...
 ```
-
-2. Click **Add**.
-
-3. Select:
-
-```text
-By Topic
-```
-
-4. Select:
-
-```text
-/scan
-```
-
-5. Add:
-
-```text
-LaserScan
-```
-
-The LiDAR scan should now be visible.
-
----
-
-# Part I – Install Mapping and Localization Packages
-
-## Step 20: Install Required Packages
-
-```bash
-sudo apt update
-
-sudo apt install ros-jazzy-slam-toolbox
-
-sudo apt install ros-jazzy-navigation2
-
-sudo apt install ros-jazzy-nav2-bringup
-
-sudo apt install ros-jazzy-teleop-twist-keyboard
-```
-
----
-
-# Part J – Mapping Using SLAM Toolbox
-
-> **Note:** Mapping requires the robot to move through the environment and provide appropriate odometry and TF information.
-
-## Step 21: Start SLAM Toolbox
-
-Open another terminal:
-
-```bash
-source /opt/ros/jazzy/setup.bash
-source ~/lidar_bot_ws/install/setup.bash
-```
-
-Run:
-
-```bash
-ros2 launch slam_toolbox online_async_launch.py use_sim_time:=true
-```
-
----
-
-## Step 22: Visualize the Map
-
-Open RViz2:
-
-```bash
-rviz2
-```
-
-Set:
-
-```text
-Fixed Frame = map
-```
-
-Add:
-
-```text
-/map
-```
-
-Move the robot through the environment.
-
-The map should gradually be generated.
-
----
-
-# Part K – Save the Map
-
-## Step 23: Create the Map Directory
-
-```bash
-mkdir -p ~/lidar_bot_ws/src/my_robot_description/maps
-```
-
----
-
-## Step 24: Save the Map
-
-```bash
-ros2 run nav2_map_server map_saver_cli \
--f ~/lidar_bot_ws/src/my_robot_description/maps/lab_map
-```
-
-The following files will be generated:
-
-```text
-lab_map.yaml
-lab_map.pgm
-```
-
----
-
-# Part L – Localization Using AMCL
-
-> **Important:** AMCL requires:
->
-> - A known map
-> - LiDAR data
-> - Robot odometry
-> - A valid TF relationship between `odom` and `base_link`
-
-## Step 25: Stop SLAM
 
 Press:
 
@@ -1231,243 +491,609 @@ Press:
 Ctrl + C
 ```
 
-Stop the mapping process after the map has been saved.
+to stop the command.
 
 ---
 
-## Step 26: Restart the Simulation
+## 19. Important LaserScan Parameters
 
-```bash
-ros2 launch my_robot_description sim.launch.py
-```
+The `sensor_msgs/msg/LaserScan` message contains important parameters.
 
----
-
-## Step 27: Start AMCL and Map Server
-
-```bash
-ros2 launch nav2_bringup localization_launch.py \
-use_sim_time:=true \
-map:=$HOME/lidar_bot_ws/src/my_robot_description/maps/lab_map.yaml
-```
-
-This starts:
-
-- Map Server
-- AMCL Localization
+| Parameter | Description |
+|---|---|
+| `header` | Message timestamp and frame |
+| `frame_id` | Coordinate frame of the LiDAR |
+| `angle_min` | Minimum scanning angle |
+| `angle_max` | Maximum scanning angle |
+| `angle_increment` | Angular separation between measurements |
+| `time_increment` | Time between individual measurements |
+| `scan_time` | Time required for one complete scan |
+| `range_min` | Minimum valid measurement range |
+| `range_max` | Maximum valid measurement range |
+| `ranges` | Measured distances |
+| `intensities` | Laser return intensity information, when available |
 
 ---
 
-# Part M – Set the Initial Pose
+## 20. RViz2 Visualization
 
-## Step 28: Start RViz2
+Open RViz2:
 
 ```bash
 rviz2
 ```
 
-Set:
-
-```text
-Fixed Frame = map
-```
-
-Add:
-
-```text
-/map
-/scan
-/amcl_pose
-```
-
----
-
-## Step 29: Set Initial Pose
+### Step 1: Set Fixed Frame
 
 In RViz2:
 
-1. Select **2D Pose Estimate**.
-2. Click on the approximate location of the robot.
-3. Drag the arrow in the direction in which the robot is facing.
+```text
+Global Options
+      |
+      +-- Fixed Frame
+```
 
-This publishes an initial pose to:
+Set the Fixed Frame to:
 
 ```text
-/initialpose
+laser
+```
+
+If your driver uses another frame, use the frame shown by:
+
+```bash
+ros2 topic echo /scan --once
+```
+
+and check:
+
+```text
+header:
+  frame_id: ...
 ```
 
 ---
 
-# Part N – Monitor Localization
+### Step 2: Add LaserScan Display
 
-## Step 30: Check the Estimated Pose
+In RViz2:
 
-Run:
+1. Click **Add**.
+2. Select **By topic**.
+3. Select:
 
-```bash
-ros2 topic echo /amcl_pose
+```text
+/scan
 ```
+
+4. Select:
+
+```text
+LaserScan
+```
+
+Alternatively:
+
+```text
+Add → LaserScan
+```
+
+Then set:
+
+```text
+Topic: /scan
+```
+
+---
+
+## 21. RViz2 Configuration
+
+Recommended settings:
+
+```text
+Global Options
+    Fixed Frame: laser
+
+LaserScan
+    Topic: /scan
+```
+
+The scan should now appear as a collection of points around the LiDAR.
 
 Example:
 
 ```text
-pose:
-  pose:
-
-    position:
-
-      x: 1.25
-      y: 0.80
-
-    orientation:
-
-      z: 0.32
-      w: 0.94
+                  *
+             *         *
+          *               *
+        *        RPLiDAR     *
+          *               *
+             *         *
+                  *
 ```
 
-The values represent the estimated position and orientation of the robot.
+The exact shape depends on the surrounding environment.
 
 ---
 
-# Part O – Verify the TF Tree
+## 22. Observe the Environment
 
-## Step 31: Generate the TF Frame Diagram
+Place different objects around the RPLiDAR.
 
-Run:
+For example:
+
+```text
+             Wall
+     ####################
+
+             * * * *
+          *           *
+        *      LIDAR     *
+          *           *
+             * * * *
+
+       Chair          Box
+         []             []
+```
+
+Observe the changes in RViz2 when:
+
+- An object is moved closer.
+- An object is moved farther away.
+- A person walks around the sensor.
+- A wall is placed in front of the sensor.
+- The LiDAR is rotated or repositioned.
+
+---
+
+## 23. ROS 2 Data Flow
+
+The complete experimental workflow is:
+
+```text
++----------------+
+|    RPLiDAR     |
++-------+--------+
+        |
+        | Laser Measurements
+        v
++----------------+
+| sllidar_node   |
++-------+--------+
+        |
+        | /scan
+        | sensor_msgs/msg/LaserScan
+        v
++----------------+
+|     ROS 2      |
+|     Topic      |
++-------+--------+
+        |
+        v
++----------------+
+|     RViz2      |
++-------+--------+
+        |
+        v
+2D Environment Visualization
+```
+
+---
+
+## 24. Algorithm
+
+1. Start the computer.
+2. Connect the RPLiDAR to the USB port.
+3. Identify the serial device.
+4. Source ROS 2 Jazzy.
+5. Source the RPLiDAR workspace.
+6. Start the RPLiDAR ROS 2 driver.
+7. Verify that the `/scan` topic is available.
+8. Check the `LaserScan` message type.
+9. Start RViz2.
+10. Set the correct Fixed Frame.
+11. Add a LaserScan display.
+12. Select `/scan`.
+13. Observe the 2D laser scan.
+14. Place different objects around the RPLiDAR.
+15. Observe the corresponding changes in RViz2.
+16. Record the observations.
+
+---
+
+## 25. Observation Table
+
+Students should record the observed LiDAR behavior.
+
+| Trial | Object | Approx. Distance | Detected in RViz2 | Observation |
+|---:|---|---:|---|---|
+| 1 | Wall | 1.0 m | Yes | Continuous scan |
+| 2 | Box | 0.5 m | Yes | Clear object boundary |
+| 3 | Chair | 1.5 m | Yes | Multiple scan points |
+| 4 | Person | 2.0 m | Yes | Scan changes with movement |
+| 5 | No obstacle | — | — | Open scan area |
+
+> Replace the sample values with actual experimental observations.
+
+---
+
+## 26. Useful ROS 2 Commands
+
+### Source ROS 2
 
 ```bash
-ros2 run tf2_tools view_frames
+source /opt/ros/jazzy/setup.bash
 ```
 
-A file named:
+### Source workspace
+
+```bash
+source ~/rplidar_ws/install/setup.bash
+```
+
+### Check package
+
+```bash
+ros2 pkg list | grep sllidar
+```
+
+### List nodes
+
+```bash
+ros2 node list
+```
+
+### List topics
+
+```bash
+ros2 topic list
+```
+
+### Check `/scan` type
+
+```bash
+ros2 topic type /scan
+```
+
+### Check publishing rate
+
+```bash
+ros2 topic hz /scan
+```
+
+### Display scan data
+
+```bash
+ros2 topic echo /scan
+```
+
+### Start RViz2
+
+```bash
+rviz2
+```
+
+---
+
+## 27. Troubleshooting
+
+### Problem 1: `/dev/ttyUSB0` does not exist
+
+Check:
+
+```bash
+ls /dev/ttyUSB*
+```
+
+and:
+
+```bash
+ls /dev/ttyACM*
+```
+
+Also check:
+
+```bash
+lsusb
+```
+
+Try disconnecting and reconnecting the USB cable.
+
+---
+
+### Problem 2: Permission denied
+
+Check:
+
+```bash
+ls -l /dev/ttyUSB0
+```
+
+For temporary testing:
+
+```bash
+sudo chmod 777 /dev/ttyUSB0
+```
+
+Then restart the RPLiDAR launch command.
+
+---
+
+### Problem 3: `/scan` topic is not available
+
+Check:
+
+```bash
+ros2 node list
+```
+
+Then:
+
+```bash
+ros2 topic list
+```
+
+If `/scan` is missing, check whether the RPLiDAR driver is running.
+
+---
+
+### Problem 4: RViz2 shows "No transform"
+
+Check the frame used by the scan:
+
+```bash
+ros2 topic echo /scan --once
+```
+
+Look for:
 
 ```text
-frames.pdf
+header:
+  frame_id: laser
 ```
 
-will be generated.
-
-The expected frame relationship is:
+Set RViz2:
 
 ```text
-map
- │
- ▼
-odom
- │
- ▼
-base_link
- │
- ▼
-laser_link
+Global Options → Fixed Frame → laser
 ```
 
 ---
 
-# Important Note About the Current Robot Model
+### Problem 5: RViz2 is empty
 
-The basic custom robot model used in this experiment provides:
-
-- `base_link`
-- `laser_link`
-- Simulated LiDAR
-- `/scan` topic
-
-For complete SLAM and AMCL localization, the robot must additionally provide:
+Check the LaserScan display:
 
 ```text
-Differential Drive
-        │
-        ▼
-Wheel Motion
-        │
-        ▼
-Odometry
-       /odom
-        │
-        ▼
-TF Transform
-odom → base_link
+Topic: /scan
 ```
 
-Therefore, before performing full autonomous mapping and localization, the custom robot must be extended with wheels, a differential-drive controller or simulation plugin, and odometry generation.
+Also verify that `/scan` is publishing:
 
-The supplied material also identifies differential drive, wheel encoders, SLAM Toolbox, AMCL, and Nav2 as the next extensions of the current LiDAR robot simulation. 
-
----
-
-# Expected Output
-
-After completing the experiment, students should observe:
-
-1. Successful creation of a custom ROS 2 robot package.
-2. Successful creation of the `mini_rover` URDF.
-3. Successful simulation of the robot in Gazebo Harmonic.
-4. LiDAR data published through `/scan`.
-5. LiDAR data visualized in RViz2.
-6. Generation of an occupancy grid map after odometry support is available.
-7. Map saved as `.yaml` and `.pgm` files.
-8. AMCL localization using the saved map.
-9. Estimated robot pose published through `/amcl_pose`.
-10. Robot pose updated as the robot moves.
+```bash
+ros2 topic hz /scan
+```
 
 ---
 
-# Applications
+### Problem 6: Wrong RPLiDAR model
 
-LiDAR-based localization is used in:
+Do not use an A1 launch file for another model without checking the required parameters.
 
-- Autonomous Mobile Robots
-- Warehouse Robots
-- Delivery Robots
-- Industrial Robots
-- Service Robots
-- Agricultural Robots
-- Hospital Robots
-- Search and Rescue Robots
-- Autonomous Navigation Systems
+Check the available launch files:
 
----
+```bash
+ros2 pkg prefix sllidar_ros2
+```
 
-# Result
+You can also inspect the package launch directory:
 
-The custom mobile robot equipped with a simulated 2D LiDAR sensor was successfully created and simulated using ROS 2 Jazzy and Gazebo Harmonic. LiDAR data was bridged to ROS 2 and visualized using RViz2. The system architecture required for mapping and localization using SLAM Toolbox and AMCL was studied and configured.
+```bash
+ls ~/rplidar_ws/src/sllidar_ros2/launch
+```
 
-After adding robot motion, odometry, and the required TF transformations, the robot can generate a map of the environment and localize itself using LiDAR measurements and the AMCL algorithm.
+Select the launch file corresponding to the installed RPLiDAR model.
 
 ---
 
-# Conclusion
+### Problem 7: Scan appears distorted or inverted
 
-This experiment demonstrated the basic architecture of a LiDAR-based mobile robot localization system using a custom robot model in ROS 2 Jazzy.
+Check the RPLiDAR driver parameters:
 
-The custom `mini_rover` was equipped with a simulated 2D LiDAR sensor and launched in Gazebo Harmonic. The sensor data was bridged to ROS 2 through the `/scan` topic and visualized in RViz2.
+```text
+inverted
+angle_compensate
+scan_mode
+```
 
-The experiment also introduced the workflow required for robot mapping and localization using SLAM Toolbox and AMCL. Complete localization requires additional support for robot motion, odometry, and the `odom → base_link` transform.
+Use the parameters appropriate for your RPLiDAR model and mounting orientation.
+
+---
+
+## 28. Result
+
+**The RPLiDAR sensor was successfully interfaced with ROS 2 and the real-time 2D laser scan data was visualized in RViz2. The `/scan` topic containing `sensor_msgs/msg/LaserScan` data was examined, and surrounding objects were detected and represented as a 2D laser scan.**
 
 ---
 
-# Viva Questions
+## 29. Precautions
 
-1. What is robot localization?
-2. What is LiDAR?
-3. What does the `/scan` topic contain?
-4. What is the ROS 2 message type used for LiDAR data?
-5. What is the purpose of `laser_link`?
-6. What is the purpose of `base_link`?
-7. What is Gazebo Harmonic?
-8. What is RViz2 used for?
-9. What is AMCL?
-10. What is SLAM?
-11. What is the difference between SLAM and localization?
-12. Why is odometry required for AMCL?
-13. What is the purpose of the `/odom` topic?
-14. What is a TF transform?
-15. Explain the relationship between `map`, `odom`, and `base_link`.
-16. What is an occupancy grid map?
-17. Why is an initial pose required for AMCL?
-18. What is the role of the ROS-Gazebo bridge?
-19. What is the purpose of the `/amcl_pose` topic?
-20. What additional components are required to convert the current LiDAR robot into a fully localizable mobile robot?
+1. Handle the RPLiDAR carefully.
+2. Use the correct USB interface and power supply.
+3. Do not force the USB connector.
+4. Verify the correct serial device before launching the driver.
+5. Use the correct launch file for the RPLiDAR model.
+6. Do not assume that every RPLiDAR model uses the same baud rate.
+7. Ensure the RPLiDAR has sufficient power.
+8. Keep rotating parts free from obstruction.
+9. Do not touch the rotating LiDAR mechanism while it is operating.
+10. Keep the LiDAR mounting stable during testing.
+11. Use the correct `frame_id` in RViz2.
+12. Do not modify ROS 2 system files unnecessarily.
+13. Stop the driver before disconnecting the sensor if possible.
+14. Use appropriate serial permissions rather than permanently relying on insecure device permissions.
+15. Keep the test environment free of unnecessary moving objects during initial testing.
 
 ---
+
+## 30. Learning Outcomes
+
+After completing this experiment, students should be able to:
+
+- Explain the basic principle of LiDAR.
+- Identify the purpose of an RPLiDAR sensor.
+- Connect an RPLiDAR to a computer.
+- Configure a ROS 2 LiDAR driver.
+- Identify the `/scan` ROS 2 topic.
+- Explain the `sensor_msgs/msg/LaserScan` message.
+- Configure RViz2 for LiDAR visualization.
+- Understand the importance of coordinate frames.
+- Interpret a 2D laser scan.
+- Troubleshoot basic RPLiDAR and ROS 2 communication problems.
+
+---
+
+## 31. Viva Questions
+
+### Basic Questions
+
+1. What is LiDAR?
+2. What is the full form of LiDAR?
+3. What is RPLiDAR?
+4. What is the purpose of an RPLiDAR in robotics?
+5. What is ROS 2?
+6. What is RViz2?
+7. What is the `/scan` topic?
+8. What is the message type of `/scan`?
+
+### Intermediate Questions
+
+9. What is `sensor_msgs/msg/LaserScan`?
+10. What is `frame_id`?
+11. What is a TF frame?
+12. What is the purpose of the Fixed Frame in RViz2?
+13. What is `angle_min`?
+14. What is `angle_max`?
+15. What is `angle_increment`?
+16. What is `range_min`?
+17. What is `range_max`?
+18. How does a 2D LiDAR detect an obstacle?
+19. Why does an RPLiDAR rotate?
+20. Why is the `/scan` topic important?
+
+### Advanced Questions
+
+21. What is the difference between LiDAR and ultrasonic sensing?
+22. What is the difference between LiDAR and camera-based perception?
+23. Why is TF important in ROS 2?
+24. What happens if the RViz2 Fixed Frame is incorrect?
+25. Why can different RPLiDAR models require different baud rates?
+26. What is the purpose of `angle_compensate`?
+27. What is the purpose of the `inverted` parameter?
+28. How can `/scan` data be used for obstacle avoidance?
+29. How can LiDAR data be used for SLAM?
+30. What additional components are required to perform full mobile robot localization using LiDAR?
+
+---
+
+## 32. Optional Extension: Save and Analyze LaserScan Data
+
+Students can inspect the scan topic:
+
+```bash
+ros2 topic echo /scan
+```
+
+They can also investigate:
+
+```bash
+ros2 topic hz /scan
+```
+
+and:
+
+```bash
+ros2 topic info /scan
+```
+
+This helps students understand ROS 2 topic communication.
+
+---
+
+## 33. Optional Extension: LiDAR-Based Obstacle Detection
+
+The `/scan` data can be used for simple obstacle detection.
+
+Conceptually:
+
+```text
+             RPLiDAR
+                |
+                v
+          /scan data
+                |
+                v
+       Distance Processing
+                |
+                v
+       Obstacle Detection
+                |
+        +-------+-------+
+        |               |
+    Obstacle         No obstacle
+        |               |
+        v               v
+   Stop/Turn         Continue
+```
+
+This experiment can later be extended into:
+
+- Reactive obstacle avoidance
+- Robot localization
+- SLAM
+- Nav2 navigation
+- Autonomous mobile robot navigation
+
+---
+
+## 34. Experiment Summary
+
+```text
+                    RPLiDAR
+                       |
+                       | USB
+                       v
+               +---------------+
+               | ROS 2 Driver  |
+               | sllidar_node  |
+               +-------+-------+
+                       |
+                       | /scan
+                       v
+             LaserScan Message
+                       |
+                       v
+                  +---------+
+                  |  RViz2  |
+                  +----+----+
+                       |
+                       v
+             2D Environment Scan
+```
+
+### Core Concept
+
+**RPLiDAR → ROS 2 Driver → `/scan` → LaserScan → RViz2 → Environment Visualization**
+
+---
+
+## 35. References
+
+1. SLAMTEC `sllidar_ros2` package: https://github.com/Slamtec/sllidar_ros2
+2. ROS 2 Documentation: https://docs.ros.org/
+3. RViz2 documentation: https://docs.ros.org/en/jazzy/p/rviz2/
+4. SLAMTEC RPLiDAR: https://www.slamtec.com/en/Lidar
+
+---
+
+**Experiment 9 Complete**
