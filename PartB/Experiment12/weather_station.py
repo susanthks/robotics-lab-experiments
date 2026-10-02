@@ -4,7 +4,7 @@ import adafruit_dht
 import adafruit_bmp280
 
 # DHT sensor
-dht = adafruit_dht.DHT11(board.D4)
+dht = adafruit_dht.DHT22(board.D4)
 
 # BMP280 sensor using I2C
 i2c = board.I2C()
