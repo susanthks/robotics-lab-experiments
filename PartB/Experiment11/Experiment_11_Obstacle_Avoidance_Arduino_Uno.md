@@ -42,15 +42,16 @@ In this experiment, the **Arduino Uno** reads the distance from an HC-SR04 ultra
 
 For an ultrasonic sensor:
 
-\[
-d = rac{v 	imes t}{2}
-\]
+$$
+d = \frac{v \times t}{2}
+$$
 
 For practical Arduino calculations:
 
-\[
-d(cm) pprox rac{t(\mu s)}{58}
-\]
+$$
+d(\text{cm}) \approx \frac{t(\mu\text{s})}{58}
+$$
+
 
 ## 4. Block Diagram
 
