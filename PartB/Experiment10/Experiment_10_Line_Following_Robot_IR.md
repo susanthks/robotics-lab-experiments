@@ -81,19 +81,8 @@ Therefore, the sensor can distinguish between the black line and the white backg
 
 For a basic line-following robot, two IR sensors are positioned at the front.
 
-```text
-                 FRONT
-                   ↑
+<img width="600" height="640" alt="image" src="https://github.com/user-attachments/assets/9bdd64ab-57cb-4ee1-b1d3-35da16e233c8" />
 
-          ┌─────────────────┐
-          │                 │
-          │  IR-L     IR-R  │
-          │    ↓        ↓   │
-          │                 │
-          │  Left     Right │
-          │  Motor    Motor │
-          └─────────────────┘
-```
 
 The sensors are:
 
@@ -128,20 +117,9 @@ A motor driver is required because an Arduino cannot directly supply the current
 
 For an L298N-type motor driver:
 
-```text
-                         Arduino
-                            │
-             ┌──────────────┼──────────────┐
-             │              │              │
-            IN1            IN2            IN3/IN4
-             │              │              │
-             └──────────────┴──────────────┘
-                            │
-                     Motor Driver
-                       ┌────┴────┐
-                       ↓         ↓
-                  Left Motor  Right Motor
-```
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/b1fe8365-02da-409e-813d-630e5468e168" />
+
 
 The motor driver controls:
 
@@ -214,177 +192,20 @@ Battery
 
 ## 10. Arduino Program
 
+```text
+line_follower_program.ino
+```
+
 The following program assumes:
 
 **LOW = Black line detected**
 
-```cpp
-// Experiment 10
-// Line Following Robot Using IR Sensors
-
-// IR Sensor Pins
-const int LEFT_IR  = 2;
-const int RIGHT_IR = 3;
-
-// Motor Driver Pins
-const int IN1 = 8;
-const int IN2 = 9;
-const int IN3 = 10;
-const int IN4 = 11;
-
-void setup()
-{
-  // IR sensor pins
-  pinMode(LEFT_IR, INPUT);
-  pinMode(RIGHT_IR, INPUT);
-
-  // Motor driver pins
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
-
-  Serial.begin(9600);
-
-  stopRobot();
-}
-
-void loop()
-{
-  int leftSensor  = digitalRead(LEFT_IR);
-  int rightSensor = digitalRead(RIGHT_IR);
-
-  Serial.print("Left: ");
-  Serial.print(leftSensor);
-
-  Serial.print("  Right: ");
-  Serial.println(rightSensor);
-
-  // Both sensors detect black line
-  if (leftSensor == LOW && rightSensor == LOW)
-  {
-    moveForward();
-  }
-
-  // Left sensor detects black line
-  else if (leftSensor == LOW && rightSensor == HIGH)
-  {
-    turnLeft();
-  }
-
-  // Right sensor detects black line
-  else if (leftSensor == HIGH && rightSensor == LOW)
-  {
-    turnRight();
-  }
-
-  // Both sensors detect white surface
-  else
-  {
-    stopRobot();
-  }
-}
-
-
-// ---------------- MOTOR FUNCTIONS ----------------
-
-void moveForward()
-{
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-}
-
-void turnLeft()
-{
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
-}
-
-void turnRight()
-{
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, LOW);
-}
-
-void stopRobot()
-{
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, LOW);
-}
-```
 
 ---
 
-## 11. Program Explanation
 
-### Sensor Reading
 
-```cpp
-int leftSensor = digitalRead(LEFT_IR);
-int rightSensor = digitalRead(RIGHT_IR);
-```
-
-These statements read the digital outputs of the two IR sensors.
-
-### Forward Motion
-
-```cpp
-if (leftSensor == LOW && rightSensor == LOW)
-{
-    moveForward();
-}
-```
-
-When both sensors detect the line according to the assumed sensor logic, both motors are commanded to move forward.
-
-### Left Turn
-
-```cpp
-else if (leftSensor == LOW && rightSensor == HIGH)
-{
-    turnLeft();
-}
-```
-
-The robot changes its direction toward the left.
-
-### Right Turn
-
-```cpp
-else if (leftSensor == HIGH && rightSensor == LOW)
-{
-    turnRight();
-}
-```
-
-The robot changes its direction toward the right.
-
-### Stop
-
-```cpp
-else
-{
-    stopRobot();
-}
-```
-
-When both sensors indicate that the line is not detected, the robot stops.
-
----
-
-## 12. Flowchart
+## 11. Flowchart
 
 ```text
                  START
@@ -416,7 +237,7 @@ When both sensors indicate that the line is not detected, the robot stops.
 
 ---
 
-## 13. Procedure
+## 12. Procedure
 
 1. Assemble the robot chassis with two DC motors and wheels.
 2. Mount the two IR sensors at the front of the robot.
@@ -433,7 +254,7 @@ When both sensors indicate that the line is not detected, the robot stops.
 
 ---
 
-## 14. Observation
+## 13. Observation
 
 Record the sensor values and corresponding robot action.
 
@@ -446,13 +267,13 @@ Record the sensor values and corresponding robot action.
 
 ---
 
-## 15. Result
+## 14. Result
 
-**The line-following robot was successfully designed and implemented using IR sensors. The robot was able to detect the line and automatically control the direction of the DC motors to follow the predefined path.**
+The line-following robot was successfully designed and implemented using IR sensors. The robot was able to detect the line and automatically control the direction of the DC motors to follow the predefined path.
 
 ---
 
-## 16. Precautions
+## 15. Precautions
 
 1. Check the polarity of the motor connections before powering the circuit.
 2. Ensure that Arduino and motor-driver grounds are common.
@@ -467,7 +288,7 @@ Record the sensor values and corresponding robot action.
 
 ---
 
-## 17. Viva Questions
+## 16. Viva Questions
 
 ### Basic Questions
 
@@ -500,7 +321,7 @@ Record the sensor values and corresponding robot action.
 
 ---
 
-## 18. Optional Extensions
+## 17. Optional Extensions
 
 Students can extend the experiment by implementing:
 
@@ -545,25 +366,7 @@ Modify the algorithm to detect:
 
 ---
 
-## 19. Suggested Repository Structure
-
-```text
-PartB/
-└── Experiment10_Line_Following_Robot_IR/
-    ├── README.md
-    ├── Arduino_Code/
-    │   └── line_following_robot.ino
-    ├── Circuit_Diagram/
-    │   └── circuit.png
-    ├── Images/
-    │   └── line_following_robot.jpg
-    └── Manual/
-        └── Experiment_10_Line_Following_Robot.pdf
-```
-
----
-
-## 20. Learning Outcome
+## 18. Learning Outcome
 
 After completing this experiment, students should be able to:
 
