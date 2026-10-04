@@ -58,6 +58,9 @@ For programming using an FTDI programmer:
 | GND | GND |
 | 5V | 5V |
 
+<img width="1023" height="552" alt="image" src="https://github.com/user-attachments/assets/2bddd4ca-21c3-48df-ac37-7707d783b7e9" />
+
+
 **Important:** Connect **GPIO0 to GND only during programming**. Remove the GPIO0-GND connection before normal operation.
 
 ## Procedure
