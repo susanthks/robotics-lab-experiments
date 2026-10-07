@@ -196,7 +196,7 @@ ros2 pkg create --build-type ament_python pub_sub_py --dependencies rclpy std_ms
 Create a Python file named
 
 ```text
-publisher.py
+touch ~/ros2_ws/src/pub_sub_py/pub_sub_py/publisher.py
 ```
 
 The Publisher should
@@ -218,7 +218,7 @@ Hello ROS 2
 Create
 
 ```text
-subscriber.py
+touch ~/ros2_ws/src/pub_sub_py/pub_sub_py/subscriber.py
 ```
 
 The Subscriber should
@@ -231,6 +231,16 @@ Example Output
 ```text
 I heard: Hello ROS 2
 ```
+
+#### Update Setup File setup.py
+
+```python
+entry_points={
+    'console_scripts': [
+        'publisher = pub_sub_py.publisher:main',
+        'subscriber = pub_sub_py.subscriber:main'
+    ],
+},
 
 ---
 
@@ -287,7 +297,7 @@ I heard: Hello ROS 2
 Create
 
 ```text
-service.py
+touch ~/ros2_ws/src/pub_sub_py/pub_sub_py/service.py
 ```
 
 Use
@@ -316,7 +326,7 @@ Returns
 Create
 
 ```text
-client.py
+touch ~/ros2_ws/src/pub_sub_py/pub_sub_py/client.py
 ```
 
 Example Output
@@ -326,6 +336,18 @@ Request : 10 + 20
 
 Response : 30
 ```
+
+#### Update Setup File setup.py
+
+```python
+entry_points={
+    'console_scripts': [
+        'publisher = pub_sub_py.publisher:main',
+        'subscriber = pub_sub_py.subscriber:main',
+        'service = pub_sub_py.service:main',
+        'client = pub_sub_py.client:main',
+    ],
+},
 
 ---
 
