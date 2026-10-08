@@ -349,7 +349,7 @@ entry_points={
         'client = pub_sub_py.client:main',
     ],
 },
-
+```
 ---
 
 ### Step 15: Build the Workspace
