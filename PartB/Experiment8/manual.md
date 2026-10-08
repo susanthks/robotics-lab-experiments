@@ -241,6 +241,7 @@ entry_points={
         'subscriber = pub_sub_py.subscriber:main'
     ],
 },
+```
 
 ---
 
